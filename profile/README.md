@@ -12,19 +12,39 @@ To revolutionize atmospheric data collection by developing a new class of persis
 
 ## At the Intersection of Heritage and Innovation
 
-Our project pays homage to the Canadian "Project Stratosonde" of the 1980s, which launched 20,000 cubic meter helium balloons to study the ozone layer at altitudes of up to 29 km.
+Our project honors the legacy of Environment Canada's "Project Stratosonde" from 1986, a pioneering atmospheric research initiative that used high-altitude balloons to study the ozone layer.
+
+### The Original Project Stratosonde (1986)
+
+In July-August 1986, Canada's Atmospheric Environment Service (AES) participated in the SAGE (Stratospheric Aerosol and Gas Experiment), a U.S.-led study of the ozone layer. The mission, dubbed "Project Stratosonde," launched a 20,000 cubic meter helium balloon from Ainsworth, Nebraska, reaching altitudes up to 29 km to measure ozone, nitrogen dioxide, water vapor, nitrous oxide, and aerosols.
+
+This experiment marked Canada's first major ozone layer monitoring effort following the signing of the Vienna Convention for the Protection of the Ozone Layer in June 1986. Canada, which had operated the Canadian Ozone Monitoring Network and World Ozone Data Center for over 20 years, brought its expertise to this critical atmospheric research.
+
+The mission achieved mixed results: the first launch on July 27 successfully collected high-quality atmospheric data over five hours at 30 km altitude. However, the second launch on August 1 ended prematurely when the balloon burst shortly after liftoff, bringing the 1986 program to an unexpected close.
+
+As reported in Environment Canada's November 1986 publication, the stratosonde carried an infrared remote sensing instrument that measured gases based on their unique "fingerprint" in the atmospheric spectrum, enabling scientists to monitor variations in gas concentrations with altitude. Significantly, the mission also measured the absorption of infrared radiation by chlorofluorocarbons (CFCs) in the lower atmosphere—research that was important not only for ozone layer protection but also for understanding the greenhouse effect and potential global warming impacts.
+
+Environment Minister Tom McMillan emphasized the project's importance: "This project demonstrates that Canada, the first country to ratify the Vienna Convention for the Protection of the Ozone Layer, is committed to full cooperation in research and is committed to taking action before irreparable damage occurs." [Read the November 1986 article (PDF, French)](images/En1-3-1986-6-2-fra.pdf)
+
+![Project Stratosonde 1986 - Zephyr Magazine](images/zephyr1986.png)
+*From Environment Canada's Zephyr magazine, documenting the 1986 Project Stratosonde atmospheric research mission.* [Read the full article (PDF)](images/noel1986f.pdf)
+
+### Modern Stratosonde: Building on Heritage
 
 Our work builds upon three distinct traditions:
 
-- **Scientific Research**: Drawing from the legacy of Canada's atmospheric studies and ozone monitoring programs
+- **Scientific Research**: Drawing from the legacy of Canada's atmospheric studies and ozone monitoring programs pioneered in the 1980s
 - **Amateur Radio**: Embracing the spirit of ham radio operators who have pioneered long-distance communication and tracking systems
 - **Pico-Ballooning**: Extending the boundaries of what's possible with ultra-lightweight balloon platforms that circumnavigate the globe
+
+Where the 1986 project used massive 20,000 cubic meter helium balloons costing thousands of dollars per flight, today's Stratosonde weighs less than 15 grams and operates on inexpensive party balloons, making atmospheric research accessible to researchers, educators, and citizen scientists worldwide.
 
 
 ## Repositories
 
 - [**firmware**](https://github.com/stratosonde/firmware) - Core firmware for the radiosonde device
-- [**hardware**](https://github.com/stratosonde/hardware) - PCB designs, schematics, and component information
+- [**h3lite**](https://github.com/stratosonde/h3lite) - Embedded H3 geospatial indexing for automatic LoRaWAN region detection
+- [**hardware**](https://docs.google.com/document/d/1UvLQhTHOeyt-fdj2o6CyQJJvrkRZcYuKuNxAXdWrK4A/edit?usp=sharing) - PCB designs, schematics, and component information
 - [**tools**](https://github.com/stratosonde/tools) - Support tools and utilities
 - [**docs**](https://github.com/stratosonde/docs) - Documentation and guides
 
@@ -32,14 +52,23 @@ Our work builds upon three distinct traditions:
 
 - **Ultra-lightweight design** for use with inexpensive party balloons
 - **Solar-powered** with energy harvesting for multi-day or persistent operation
-- **LoRaWAN communication** with global region awareness
+- **Global region awareness** with automatic LoRaWAN frequency plan selection via H3 geospatial indexing
+- **LoRaWAN communication** with terrestrial gateways and future LEO satellite connectivity
 - **Onboard data logging** with opportunistic transmission
 - **High-altitude operation** targeting stratospheric altitudes
 - **Low-temperature resilience** for upper atmospheric conditions
 
 ## Technical Approach
 
-Our platform combines modern microelectronics, energy harvesting techniques, and advanced communications to create sensing systems that can operate independently for extended periods in Earth's upper atmosphere. By drastically reducing weight and power requirements, we're enabling a new paradigm for atmospheric research.
+Our platform combines modern microelectronics, energy harvesting techniques, and advanced communications to create sensing systems that can operate independently for extended periods in Earth's upper atmosphere. The integrated H3Lite library enables automatic LoRaWAN region detection, allowing the device to autonomously configure radio parameters as it drifts globally across different regulatory regions.
+
+Looking forward, the system is designed to leverage emerging LEO LoRaWAN satellite networks, which will enable continuous global connectivity even over oceans and remote areas where terrestrial gateways are unavailable. This will transform the Stratosonde from an opportunistic data collector to a truly global atmospheric monitoring platform.
+
+By drastically reducing weight and power requirements while incorporating intelligent geospatial awareness, we're enabling a new paradigm for atmospheric research that combines accessibility, persistence, and global reach.
+
+## Resources
+
+- [**Float Calculator**](float1g_visual.html) - Interactive tool for calculating balloon float conditions and predicting altitude performance
 
 ---
 

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Visual Superpressure Balloon Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f4f4f4; }
+    h1, h2, h3 { color: #2c3e50; }
+    .section { background: #fff; border-radius: 8px; margin-bottom: 24px; padding: 20px; box-shadow: 0 2px 8px #0001; }
+    .inputs, .outputs { display: flex; flex-wrap: wrap; gap: 24px; }
+    .input-group { flex: 1 1 220px; margin-bottom: 12px; }
+    label { font-weight: bold; }
+    input, select { width: 100%; padding: 6px; font-size: 1em; }
+    .formula { color: #555; font-size: 0.95em; margin-top: 4px; }
+    .annotation { color: #888; font-size: 0.9em; margin-top: 8px; }
+    .output-value { font-weight: bold; color: #1a6; }
+    .step-title { margin-top: 0; }
+    .chart-container { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+    .tooltip { border-bottom: 1px dotted #888; cursor: help; }
+    .balloon-container { height: 200px; position: relative; margin: 20px 0; }
+    .balloon { position: absolute; background: #f8d7da; border: 2px solid #f5c6cb; border-radius: 50%; transform: translate(-50%, -50%); transition: all 0.5s ease-in-out; }
+    .forces-container { position: relative; height: 200px; }
+    .force-arrow { position: absolute; transition: all 0.5s ease-in-out; }
+    .visualizations-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 768px) { .visualizations-grid { grid-template-columns: 1fr; } }
+    .key-info { background: #e8f4f8; padding: 10px 15px; border-radius: 6px; margin: 15px 0; }
+    .key-info h3 { margin-top: 0; color: #2980b9; }
+    .trade-off-panel { display: flex; justify-content: space-between; margin: 20px 0; }
+    .trade-off-item { flex: 1; text-align: center; padding: 10px; border: 1px solid #eee; border-radius: 6px; }
+    .plus-minus { display: flex; align-items: center; font-size: 1.5em; padding: 0 10px; }
+  </style>
+</head>
+<body>
+  <h1>Visual Superpressure Balloon Calculator</h1>
+  <p>
+    Interactive calculator with visualizations to understand the tradeoffs and balancing act in superpressure balloon design.
+    <button onclick="togglePressureAxis()" style="margin-left: 10px; padding: 2px 8px;">Toggle Pressure Axis</button>
+    <br>
+    <span class="annotation">All calculations use SI units. Pressure axis is inverted by default (showing how pressure decreases with altitude).</span>
+  </p>
+
+  <!-- SECTION 1: INPUTS -->
+  <div class="section">
+    <h2>1. User Inputs</h2>
+    <div class="inputs">
+      <div class="input-group">
+        <label for="gas_type">Gas Type</label>
+        <select id="gas_type">
+          <option value="0.08988">Hydrogen (0.08988 kg/m³ at 0°C)</option>
+          <option value="0.0922">Hydrogen 97% (0.0922 kg/m³)</option>
+          <option value="0.1786">Helium (0.1786 kg/m³ at 0°C)</option>
+          <option value="0.2233">Helium 80% (0.2233 kg/m³)</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="free_lift">Free Lift (g)</label>
+        <input type="number" id="free_lift" value="8" step="1">
+      </div>
+      <div class="input-group">
+        <label for="balloon_volume">Balloon Max Volume (m³)</label>
+        <input type="number" id="balloon_volume" value="0.5" step="0.01">
+      </div>
+      <div class="input-group">
+        <label for="balloon_weight">Balloon Weight (g)</label>
+        <input type="number" id="balloon_weight" value="105" step="1">
+      </div>
+      <div class="input-group">
+        <label for="payload_weight">Payload Weight (g)</label>
+        <input type="number" id="payload_weight" value="10" step="1">
+      </div>
+      <div class="input-group">
+        <label for="launch_elevation">Launch Elevation (m)</label>
+        <input type="number" id="launch_elevation" value="0" step="10">
+      </div>
+      <div class="input-group">
+        <label for="launch_temp">Launch Temperature (°C)</label>
+        <input type="number" id="launch_temp" value="15" step="0.1">
+      </div>
+    </div>
+    
+    <!-- Key Tradeoffs Panel -->
+    <div class="key-info">
+      <h3>Key Tradeoffs in Balloon Design:</h3>
+      <div class="trade-off-panel">
+        <div class="trade-off-item">
+          <strong>Balloon Volume ↑</strong>
+          <p>Higher float altitude<br>More gas mass<br>Higher cost</p>
+        </div>
+        <div class="plus-minus">→</div>
+        <div class="trade-off-item">
+          <strong>Balloon Weight ↓</strong>
+          <p>Higher float altitude<br>Lower strength<br>Reduced durability</p>
+        </div>
+        <div class="plus-minus">→</div>
+        <div class="trade-off-item">
+          <strong>Fill Volume</strong>
+          <p>Controls float altitude<br>Affects burst altitude<br>Determines onset altitude</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS SECTION -->
+  <div class="section">
+    <h2>Key Results</h2>
+    <div class="outputs">
+      <div class="input-group">
+        <label>Neck Lift (g)</label>
+        <span class="output-value" id="neck_lift"></span>
+        <div class="formula">Free Lift + Payload + Balloon</div>
+      </div>
+      <div class="input-group">
+        <label>Required Fill Volume (m³)</label>
+        <span class="output-value" id="fill_volume"></span>
+        <div class="formula">Neck Lift / 1000 / (ρair,launch - ρgas)</div>
+      </div>
+      <div class="input-group">
+        <label>Float Altitude (m)</label>
+        <span class="output-value" id="float_altitude"></span>
+      </div>
+      <div class="input-group">
+        <label>Internal Pressure (kPa)</label>
+        <span class="output-value" id="internal_pressure"></span>
+        <div class="formula">(Plaunch × Vfill / Tlaunch) × (Tfloat / Vmax)</div>
+      </div>
+      <div class="input-group">
+        <label>External Pressure (kPa)</label>
+        <span class="output-value" id="pressure_float"></span>
+      </div>
+      <div class="input-group">
+        <label>Differential (kPa)</label>
+        <span class="output-value" id="diff_pressure"></span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- VISUALIZATIONS SECTION -->
+  <div class="section">
+    <h2>Visualizations</h2>
+    
+    <div class="visualizations-grid">
+      <!-- Balloon Expansion Visualization -->
+      <div class="chart-container">
+        <h3>Balloon Expansion with Altitude</h3>
+        <div id="balloon-visualization" class="balloon-container"></div>
+      </div>
+      
+      <!-- Force Balance Visualization -->
+      <div class="chart-container">
+        <h3>Balance of Forces</h3>
+        <div id="forces-visualization" class="forces-container"></div>
+      </div>
+    </div>
+    
+    <!-- Pressure vs Altitude Chart -->
+    <div class="chart-container" style="margin-top: 20px;">
+      <h3>Pressure vs Altitude</h3>
+      <canvas id="pressureChart" height="300"></canvas>
+      <div class="annotation">Shows how internal and external pressure change with altitude.</div>
+    </div>
+  </div>
+
+<script>
+// Constants
+const g = 9.80665;
+const R = 8.3144598;
+const M = 0.0289644;
+const T0 = 288.15;
+const P0 = 101.325;
+const L = 0.0065;
+
+// Chart settings
+let pressureChart = null;
+let invertPressureAxis = true; // Default to inverted axis
+
+function togglePressureAxis() {
+  invertPressureAxis = !invertPressureAxis;
+  updateCalculations();
+}
+
+function isaPressureTemp(h) {
+  // Returns [P, T] at altitude h (m)
+  if (h <= 11000) {
+    const T = T0 - L * h;
+    const P = P0 * Math.pow(1 - (L * h) / T0, (g * M) / (R * L));
+    return [P, T];
+  } else {
+    const T = 216.65;
+    const P11 = P0 * Math.pow(1 - (L * 11000) / T0, (g * M) / (R * L));
+    const P = P11 * Math.exp(-g * M * (h - 11000) / (R * T));
+    return [P, T];
+  }
+}
+
+function airDensity(P, T) {
+  // P in kPa, T in K
+  return (P * 1000) / (287.05 * T);
+}
+
+function updateCalculations() {
+  // 1. Inputs
+  const gas_density = parseFloat(document.getElementById('gas_type').value);
+  const free_lift = parseFloat(document.getElementById('free_lift').value);
+  const balloon_volume = parseFloat(document.getElementById('balloon_volume').value);
+  const balloon_weight = parseFloat(document.getElementById('balloon_weight').value);
+  const payload_weight = parseFloat(document.getElementById('payload_weight').value);
+  const launch_elevation = parseFloat(document.getElementById('launch_elevation').value);
+  const launch_temp_c = parseFloat(document.getElementById('launch_temp').value);
+
+  // 2. Launch Conditions
+  const T_launch_K = launch_temp_c + 273.15;
+  let P_launch, T_launch_ISA;
+  if (launch_elevation <= 11000) {
+    T_launch_ISA = T0 - L * launch_elevation;
+    P_launch = P0 * Math.pow(1 - (L * launch_elevation) / T0, (g * M) / (R * L));
+  } else {
+    T_launch_ISA = 216.65;
+    const P11 = P0 * Math.pow(1 - (L * 11000) / T0, (g * M) / (R * L));
+    P_launch = P11 * Math.exp(-g * M * (launch_elevation - 11000) / (R * T_launch_ISA));
+  }
+  const air_density_launch = airDensity(P_launch, T_launch_ISA);
+
+  // 3. Fill Volume & Gas Amount
+  const neck_lift = free_lift + payload_weight + balloon_weight;  // Matches spreadsheet logic
+  document.getElementById('neck_lift').textContent = neck_lift.toFixed(2);
+
+  const fill_volume = (neck_lift / 1000) / (air_density_launch - gas_density);
+  document.getElementById('fill_volume').textContent = fill_volume.toFixed(4);
+
+  const gas_mass = balloon_volume * gas_density * 1000;
+  const total_mass = balloon_weight + payload_weight + gas_mass;
+
+  // 4. Float Altitude
+  let float_altitude = 0;
+  let temp_float = 0;
+  let pressure_float = 0;
+  for (let h = 0; h <= 40000; h += 1) {
+    const [P_h, T_h] = isaPressureTemp(h);
+    const unconstrained_volume = fill_volume * (P_launch / P_h) * (T_h / T_launch_K);
+    if (unconstrained_volume >= balloon_volume) {
+      float_altitude = h;
+      temp_float = T_h;
+      pressure_float = P_h;
+      break;
+    }
+  }
+  document.getElementById('float_altitude').textContent = float_altitude.toFixed(0);
+  document.getElementById('pressure_float').textContent = pressure_float.toFixed(3);
+
+  // 5. Pressure Calculations at Float - using the correct formula that matches the spreadsheet
+  const internal_pressure = (P_launch * fill_volume / T_launch_K) * (temp_float / balloon_volume);
+  document.getElementById('internal_pressure').textContent = internal_pressure.toFixed(3);
+
+  const diff_pressure = internal_pressure - pressure_float;
+  document.getElementById('diff_pressure').textContent = diff_pressure.toFixed(3);
+
+  // 6. Superpressure Onset Altitude - where the balloon first reaches its maximum volume
+  let onset_altitude = float_altitude; // Default to float altitude
+
+  // 7. Update visualizations
+  updatePressureChart(P_launch, fill_volume, T_launch_K, balloon_volume, float_altitude, onset_altitude);
+  updateBalloonVisualization(fill_volume, balloon_volume, float_altitude);
+  updateForceVisualization(balloon_volume, total_mass, float_altitude);
+}
+
+function updatePressureChart(P_launch, fill_volume, T_launch_K, balloon_volume, float_altitude, onset_altitude) {
+  const altitudes = [];
+  const externalPressures = [];
+  const internalPressures = [];
+
+  // Generate data points
+  for (let h = 0; h <= Math.min(40000, float_altitude * 1.5); h += 100) {
+    const [P_h, T_h] = isaPressureTemp(h);
+    const unconstrained_volume = fill_volume * (P_launch / P_h) * (T_h / T_launch_K);
+    
+    altitudes.push(h);
+    externalPressures.push(P_h);
+    
+    // Internal pressure calculation
+    let p_int;
+    if (unconstrained_volume >= balloon_volume) {
+      // Use direct formula to match spreadsheet: (P_launch * fill_volume / T_launch_K) * (T_h / balloon_volume)
+      p_int = (P_launch * fill_volume / T_launch_K) * (T_h / balloon_volume);
+    } else {
+      p_int = P_h;
+    }
+    internalPressures.push(p_int);
+  }
+
+  // Create or update chart
+  if (pressureChart) pressureChart.destroy();
+  const ctx = document.getElementById('pressureChart').getContext('2d');
+  
+  pressureChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: altitudes,
+      datasets: [
+        {
+          label: 'External Pressure (kPa)',
+          data: externalPressures,
+          borderColor: 'rgba(54, 162, 235, 1)',
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderWidth: 2,
+          fill: false
+        },
+        {
+          label: 'Internal Pressure (kPa)',
+          data: internalPressures,
+          borderColor: 'rgba(255, 99, 132, 1)',
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          borderWidth: 2,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { 
+          title: { display: true, text: 'Altitude (m)' }
+        },
+        y: { 
+          title: { display: true, text: 'Pressure (kPa)' },
+          beginAtZero: true,
+          reverse: invertPressureAxis // Invert axis when enabled
+        }
+      },
+      plugins: {
+        title: { display: true, text: 'Altitude vs Pressure' }
+      }
+    }
+  });
+}
+
+function updateBalloonVisualization(fill_volume, balloon_volume, float_altitude) {
+  const container = document.getElementById('balloon-visualization');
+  container.innerHTML = '';
+  
+  // Launch balloon (small)
+  const launchBalloon = document.createElement('div');
+  launchBalloon.className = 'balloon';
+  const launchDiameter = Math.pow(fill_volume * 0.75, 1/3) * 100;
+  launchBalloon.style.width = `${launchDiameter}px`;
+  launchBalloon.style.height = `${launchDiameter}px`;
+  launchBalloon.style.left = '20%';
+  launchBalloon.style.top = '170px';
+  launchBalloon.style.backgroundColor = 'rgba(248, 215, 218, 0.7)';
+  container.appendChild(launchBalloon);
+  
+  // Float balloon (largest)
+  const floatBalloon = document.createElement('div');
+  floatBalloon.className = 'balloon';
+  const floatDiameter = Math.pow(balloon_volume * 0.75, 1/3) * 100;
+  floatBalloon.style.width = `${floatDiameter}px`;
+  floatBalloon.style.height = `${floatDiameter}px`;
+  floatBalloon.style.left = '80%';
+  floatBalloon.style.top = '30px';
+  floatBalloon.style.backgroundColor = 'rgba(255, 99, 132, 0.7)';
+  floatBalloon.style.border = '2px solid #dc3545';
+  container.appendChild(floatBalloon);
+  
+  // Add labels
+  const launchLabel = document.createElement('div');
+  launchLabel.style.position = 'absolute';
+  launchLabel.style.left = '20%';
+  launchLabel.style.top = '190px';
+  launchLabel.style.transform = 'translateX(-50%)';
+  launchLabel.style.fontSize = '0.8em';
+  launchLabel.textContent = 'Launch';
+  container.appendChild(launchLabel);
+  
+  const floatLabel = document.createElement('div');
+  floatLabel.style.position = 'absolute';
+  floatLabel.style.left = '80%';
+  floatLabel.style.top = '50px';
+  floatLabel.style.transform = 'translateX(-50%)';
+  floatLabel.style.fontSize = '0.8em';
+  floatLabel.textContent = 'Float';
+  container.appendChild(floatLabel);
+  
+  // Add float altitude marker
+  const floatMarker = document.createElement('div');
+  floatMarker.className = 'altitude-marker';
+  floatMarker.style.top = '30px';
+  floatMarker.textContent = `Float Altitude: ${float_altitude.toFixed(0)}m`;
+  container.appendChild(floatMarker);
+}
+
+function updateForceVisualization(balloon_volume, total_mass, float_altitude) {
+  const container = document.getElementById('forces-visualization');
+  container.innerHTML = '';
+  
+  // Get air density at float altitude
+  const [P_float, T_float] = isaPressureTemp(float_altitude);
+  const airDensityFloat = airDensity(P_float, T_float);
+  
+  // Calculate buoyancy force (in grams)
+  const buoyancyForce = balloon_volume * airDensityFloat * 1000;
+  
+  // Normalized forces for visualization (max 100)
+  const maxForce = Math.max(buoyancyForce, total_mass);
+  const normBuoyancy = (buoyancyForce / maxForce) * 100;
+  const normWeight = (total_mass / maxForce) * 100;
+  
+  // Create container for the balloon
+  const balloonDiv = document.createElement('div');
+  balloonDiv.style.position = 'absolute';
+  balloonDiv.style.width = '60px';
+  balloonDiv.style.height = '60px';
+  balloonDiv.style.borderRadius = '50%';
+  balloonDiv.style.backgroundColor = '#f8d7da';
+  balloonDiv.style.border = '2px solid #f5c6cb';
+  balloonDiv.style.left = '50%';
+  balloonDiv.style.top = '100px';
+  balloonDiv.style.transform = 'translate(-50%, -50%)';
+  container.appendChild(balloonDiv);
+  
+  // Create buoyancy arrow (up)
+  const buoyancyArrow = document.createElement('div');
+  buoyancyArrow.className = 'force-arrow';
+  buoyancyArrow.style.left = '50%';
+  buoyancyArrow.style.bottom = '120px';
+  buoyancyArrow.style.transform = 'translateX(-50%)';
+  buoyancyArrow.style.width = '20px';
+  buoyancyArrow.style.height = `${normBuoyancy}px`;
+  buoyancyArrow.style.background = 'linear-gradient(to top, #4caf50, transparent)';
+  container.appendChild(buoyancyArrow);
+  
+  // Create buoyancy label
+  const buoyancyLabel = document.createElement('div');
+  buoyancyLabel.style.position = 'absolute';
+  buoyancyLabel.style.left = '35%';
+  buoyancyLabel.style.top = '40px';
+  buoyancyLabel.style.fontSize = '0.8em';
+  buoyancyLabel.innerHTML = `Buoyancy: ${buoyancyForce.toFixed(1)}g<br>↑`;
+  container.appendChild(buoyancyLabel);
+  
+  // Create weight arrow (down)
+  const weightArrow = document.createElement('div');
+  weightArrow.className = 'force-arrow';
+  weightArrow.style.left = '50%';
+  weightArrow.style.top = '120px';
+  weightArrow.style.transform = 'translateX(-50%)';
+  weightArrow.style.width = '20px';
+  weightArrow.style.height = `${normWeight}px`;
+  weightArrow.style.background = 'linear-gradient(to bottom, #dc3545, transparent)';
+  container.appendChild(weightArrow);
+  
+  // Create weight label
+  const weightLabel = document.createElement('div');
+  weightLabel.style.position = 'absolute';
+  weightLabel.style.left = '65%';
+  weightLabel.style.top = '140px';
+  weightLabel.style.fontSize = '0.8em';
+  weightLabel.innerHTML = `↓<br>Weight: ${total_mass.toFixed(1)}g`;
+  container.appendChild(weightLabel);
+}
+
+// Set up event listeners for inputs
+document.querySelectorAll('input, select').forEach(input => {
+  input.addEventListener('input', updateCalculations);
+});
+
+// Initialize on page load
+window.onload = updateCalculations;
+</script>
+</body>
+</html>
