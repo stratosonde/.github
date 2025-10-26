@@ -16,21 +16,15 @@ Our project honors the legacy of Environment Canada's "Project Stratosonde" from
 
 ### The Original Project Stratosonde (1986)
 
-In July-August 1986, Canada's Atmospheric Environment Service (AES) participated in the SAGE (Stratospheric Aerosol and Gas Experiment), a U.S.-led study of the ozone layer. A team of 10 researchers launched a 20,000 cubic meter helium balloon from Ainsworth, Nebraska, reaching altitudes up to 29 km to measure ozone and other atmospheric gases.
+In August 1986, Canada launched a 20,000 cubic meter helium balloon in Ainsworth, Nebraska, to study the ozone layer. A team of 10 researchers from Environment Canada's Atmospheric Environment Service in Downsview, Ontario, sent the stratosonde to an altitude of 29 km to measure concentrations of ozone and other gases. The Canadian experiment, known as Project Stratosonde, was carried out in parallel with the American satellite experiment under the SAGE II program.
 
-Canada had operated the Canadian Ozone Monitoring Network and World Ozone Data Center for over 20 years, ranking first among countries in measuring atmospheric emissions of chlorofluorocarbons. This experiment marked Canada's first major attempt to monitor the ozone layer since signing the Vienna Convention for the Protection of the Ozone Layer in June 1986.
+Environment Minister Tom McMillan stated: *"This project demonstrates that Canada, the first country to ratify the Vienna Convention for the Protection of the Ozone Layer, is committed to full cooperation on research and is committed to taking action before irreparable damage occurs."*
+
+The balloon carried an infrared remote sensing instrument that measured gases based on their own "fingerprint" in the atmospheric spectrum. By studying the intensity of this fingerprint, scientists could monitor variations in the concentration of various atmospheric gases with altitude. The stratosonde also measured the absorption of infrared radiation by chlorofluorocarbons (CFCs) in the lower atmosphere. It was important to improve understanding of this process because CFCs contribute to the greenhouse effect. An increase in their concentrations could lead to significant global warming over the coming decades.
 
 **From Environment Canada's November 1986 "Stratosonde at 29 km altitude":** [Download (PDF, French)](https://github.com/stratosonde/.github/raw/main/profile/images/En1-3-1986-6-2-fra.pdf)
 
-*The balloon carried an infrared remote sensing instrument that measured gases based on their own "fingerprint" in the atmospheric spectrum. The stratosonde also measured the absorption of infrared radiation by chlorofluorocarbons (CFCs) in the lower atmosphere—research important not only for ozone layer protection but also for understanding the greenhouse effect.*
-
-Environment Minister Tom McMillan stated: *"This project demonstrates that Canada, the first country to ratify the Vienna Convention for the Protection of the Ozone Layer, is committed to full cooperation in research and is committed to taking action before irreparable damage occurs."*
-
 ![Project Stratosonde 1986 - Zephyr Magazine](images/zephyr1986.png)
-
-**From Environment Canada's Zephyr magazine "Mixed Success of the Stratosonde Project":** [Download (PDF, English)](https://github.com/stratosonde/.github/raw/main/profile/images/noel1986f.pdf)
-
-*The mission, carried out between July 27 and August 3, achieved mixed results. The first launch successfully reached 29 km altitude before descending to 18 km for measurements. However, as researcher Lewis Poulain described, the mission was not a complete success, with challenges encountered during the experimental program.*
 
 ### Modern Stratosonde: Building on Heritage
 
@@ -71,7 +65,8 @@ By drastically reducing weight and power requirements while incorporating intell
 
 ## Resources
 
-- [**Float Calculator**](https://stratosonde.github.io/.github/profile/float1g_visual.html) - Interactive tool for calculating balloon float conditions and predicting altitude performance (based on the [UKHAS SPLAT float1g calculator](https://ukhas.org.uk/doku.php?id=projects:splat))
+- [**Balloon Float Calculator**](https://stratosonde.github.io/.github/profile/float1g_visual.html) - Interactive step-by-step calculator with physics explanations, formulas, and safety indicators (based on the [UKHAS SPLAT float1g calculator](https://ukhas.org.uk/doku.php?id=projects:splat))
+- [**Power Budget Calculator**](https://stratosonde.github.io/.github/profile/solar_radiosonde_power_budget.html) - Analyze power consumption, battery capacity, and energy harvesting for the solar-powered radiosonde system
 
 ## Community
 
