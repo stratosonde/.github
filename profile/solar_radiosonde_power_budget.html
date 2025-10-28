@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Radiosonde Power Budget</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --warning-color: #e74c3c;
+            --background-color: #f8f9fa;
+            --card-background: white;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .config-card {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .config-card h3 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .chart-container {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .result-panel {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .warning {
+            color: var(--warning-color);
+            font-weight: bold;
+        }
+
+        .success {
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        #summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        #summary-table th, #summary-table td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+        }
+
+        #summary-table th {
+            background-color: var(--background-color);
+        }
+
+        .timeline-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Solar Radiosonde Power Budget</h1>
+            <p>Configure parameters, analyze power usage, and simulate battery capacity over time</p>
+            
+            <div class="diagram-container" style="margin: 30px auto; max-width: 700px; background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                <h3 style="text-align: center; margin-bottom: 15px;">System Power Architecture</h3>
+                <svg width="700" height="350" viewBox="0 0 700 350" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Solar Panel -->
+                    <rect x="50" y="60" width="100" height="60" rx="5" fill="#f1c40f" stroke="#333" stroke-width="2"/>
+                    <text x="100" y="95" text-anchor="middle" font-size="14">Solar Panel</text>
+                    
+                    <!-- BQ25570 with Buck Output highlighted -->
+                    <rect x="250" y="40" width="200" height="100" rx="5" fill="#3498db" stroke="#333" stroke-width="2"/>
+                    <text x="350" y="65" text-anchor="middle" font-size="16" font-weight="bold">BQ25570</text>
+                    <text x="350" y="90" text-anchor="middle" font-size="14">Power Management</text>
+                    
+                    <!-- Boost Charger highlighted inside BQ25570 -->
+                    <rect x="270" y="100" width="80" height="25" rx="3" fill="#e67e22" stroke="#333" stroke-width="1"/>
+                    <text x="310" y="117" text-anchor="middle" font-size="12">Boost Charger</text>
+                    
+                    <!-- Buck Output highlighted inside BQ25570 -->
+                    <rect x="370" y="100" width="60" height="25" rx="3" fill="#2ecc71" stroke="#333" stroke-width="1"/>
+                    <text x="400" y="117" text-anchor="middle" font-size="12">Buck</text>
+                    
+                    <!-- LTO Battery (moved left) -->
+                    <rect x="120" y="130" width="100" height="40" rx="5" fill="#e74c3c" stroke="#333" stroke-width="2"/>
+                    <text x="170" y="155" text-anchor="middle" font-size="14">LTO Battery 4.4V</text>
+                    
+                    <!-- Place components symmetrically -->
+                    <!-- Microcontroller -->
+                    <rect x="200" y="290" width="100" height="40" rx="5" fill="#3498db" stroke="#333" stroke-width="2"/>
+                    <text x="250" y="315" text-anchor="middle" font-size="14">Microcontroller</text>
+                    
+                    <!-- Radio -->
+                    <rect x="320" y="290" width="100" height="40" rx="5" fill="#f39c12" stroke="#333" stroke-width="2"/>
+                    <text x="370" y="315" text-anchor="middle" font-size="14">LoRa Radio</text>
+                    
+                    <!-- GPS -->
+                    <rect x="440" y="290" width="100" height="40" rx="5" fill="#e74c3c" stroke="#333" stroke-width="2"/>
+                    <text x="490" y="315" text-anchor="middle" font-size="14">GPS</text>
+                    
+                    <!-- SHT31 -->
+                    <rect x="560" y="290" width="100" height="40" rx="5" fill="#2ecc71" stroke="#333" stroke-width="2"/>
+                    <text x="610" y="315" text-anchor="middle" font-size="14">SHT31</text>
+                    
+                    <!-- Connectors -->
+                    <!-- Solar to BQ25570 -->
+                    <line x1="150" y1="80" x2="250" y2="80" stroke="#333" stroke-width="2"/>
+                    <text x="200" y="70" text-anchor="middle" font-size="12" fill="#333">0.5V, 50mA</text>
+                    
+                    <!-- Battery to BQ25570 Boost Charger -->
+                    <line x1="220" y1="150" x2="270" y2="150" stroke="#e67e22" stroke-width="2"/>
+                    <line x1="270" y1="150" x2="270" y2="125" stroke="#e67e22" stroke-width="2"/>
+                    <path d="M260,150 L270,150 L265,145" fill="none" stroke="#e67e22" stroke-width="2"/>
+                    <text x="245" y="140" text-anchor="middle" font-size="12" fill="#e67e22">Charges</text>
+                    
+                    <!-- Buck Output Main Line -->
+                    <line x1="430" y1="112" x2="430" y2="210" stroke="#2ecc71" stroke-width="2"/>
+                    
+                    <!-- Main regulated power distribution bus - Horizontal at Y=210 -->
+                    <line x1="250" y1="210" x2="610" y2="210" stroke="#2ecc71" stroke-width="2"/>
+                    
+                    <!-- Vertical drops to all components - symmetrical -->
+                    <!-- MCU -->
+                    <line x1="250" y1="210" x2="250" y2="290" stroke="#2ecc71" stroke-width="2"/>
+                    <path d="M255,280 L250,290 L245,280" fill="none" stroke="#2ecc71" stroke-width="2"/>
+                    
+                    <!-- LoRa -->
+                    <line x1="370" y1="210" x2="370" y2="290" stroke="#2ecc71" stroke-width="2"/>
+                    <path d="M375,280 L370,290 L365,280" fill="none" stroke="#2ecc71" stroke-width="2"/>
+                    
+                    <!-- GPS -->
+                    <line x1="490" y1="210" x2="490" y2="290" stroke="#2ecc71" stroke-width="2"/>
+                    <path d="M495,280 L490,290 L485,280" fill="none" stroke="#2ecc71" stroke-width="2"/>
+                    
+                    <!-- SHT31 -->
+                    <line x1="610" y1="210" x2="610" y2="290" stroke="#2ecc71" stroke-width="2"/>
+                    <path d="M615,280 L610,290 L605,280" fill="none" stroke="#2ecc71" stroke-width="2"/>
+                    
+                    <text x="430" y="190" text-anchor="middle" font-size="12" fill="#2ecc71">Regulated 3.0V Bus</text>
+                </svg>
+                <p style="text-align: center; margin-top: 10px;"><em>Block diagram showing power distribution: All components (MCU, LoRa Radio, GPS, SHT31) powered from the regulated 3.0V buck converter output of the BQ25570.</em></p>
+                
+                <h3 style="text-align: center; margin: 30px 0 15px 0;">Operation Sequence Diagram</h3>
+                <div style="overflow-x: auto;">
+                    <svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Swimlane headers -->
+                        <rect x="50" y="50" width="100" height="40" fill="#3498db" rx="5" stroke="#333" stroke-width="1"/>
+                        <text x="100" y="75" text-anchor="middle" font-size="14" fill="white" font-weight="bold">MCU</text>
+                        
+                        <rect x="50" y="110" width="100" height="40" fill="#e74c3c" rx="5" stroke="#333" stroke-width="1"/>
+                        <text x="100" y="135" text-anchor="middle" font-size="14" fill="white" font-weight="bold">GPS</text>
+                        
+                        <rect x="50" y="170" width="100" height="40" fill="#2ecc71" rx="5" stroke="#333" stroke-width="1"/>
+                        <text x="100" y="195" text-anchor="middle" font-size="14" fill="white" font-weight="bold">SHT31</text>
+                        
+                        <rect x="50" y="230" width="100" height="40" fill="#f39c12" rx="5" stroke="#333" stroke-width="1"/>
+                        <text x="100" y="255" text-anchor="middle" font-size="14" fill="white" font-weight="bold">LoRa TX</text>
+                        
+                        <rect x="50" y="290" width="100" height="40" fill="#f39c12" rx="5" stroke="#333" stroke-width="1"/>
+                        <text x="100" y="315" text-anchor="middle" font-size="14" fill="white" font-weight="bold">LoRa RX</text>
+                        
+                        <!-- Horizontal swimlanes -->
+                        <line x1="150" y1="70" x2="750" y2="70" stroke="#333" stroke-width="1" stroke-dasharray="5,3"/>
+                        <line x1="150" y1="130" x2="750" y2="130" stroke="#333" stroke-width="1" stroke-dasharray="5,3"/>
+                        <line x1="150" y1="190" x2="750" y2="190" stroke="#333" stroke-width="1" stroke-dasharray="5,3"/>
+                        <line x1="150" y1="250" x2="750" y2="250" stroke="#333" stroke-width="1" stroke-dasharray="5,3"/>
+                        <line x1="150" y1="310" x2="750" y2="310" stroke="#333" stroke-width="1" stroke-dasharray="5,3"/>
+                        
+                        <!-- Timeline -->
+                        <line x1="50" y1="350" x2="650" y2="350" stroke="#333" stroke-width="2"/>
+                        <line x1="50" y1="345" x2="50" y2="355" stroke="#333" stroke-width="2"/>
+                        <text x="50" y="370" text-anchor="middle" font-size="12">-2s</text>
+                        
+                        <line x1="100" y1="345" x2="100" y2="355" stroke="#333" stroke-width="2"/>
+                        <text x="100" y="370" text-anchor="middle" font-size="12">-1s</text>
+                        
+                        <line x1="150" y1="345" x2="150" y2="355" stroke="#333" stroke-width="2"/>
+                        <text x="150" y="370" text-anchor="middle" font-size="12">0s</text>
+                        
+                        <line x1="200" y1="345" x2="200" y2="355" stroke="#333" stroke-width="2"/>
+                        <text x="200" y="370" text-anchor="middle" font-size="12">1s</text>
+                        
+                        <line x1="250" y1="345" x2="250" y2="355" stroke="#333" stroke-width="2"/>
+                        <text x="250" y="370" text-anchor="middle" font-size="12">2s</text>
+                        
+                        <line x1="350" y1="345" x2="350" y2="355" stroke="#333" stroke-width="2"/>
+                        <text x="350" y="370" text-anchor="middle" font-size="12">4s</text>
+                        
+                        <line x1="450" y1="345" x2="450" y2="355" stroke="#333" stroke-width="2"/>
+                        <text x="450" y="370" text-anchor="middle" font-size="12">6s</text>
+                        
+                        <line x1="550" y1="345" x2="550" y2="355" stroke="#333" stroke-width="2"/>
+                        <text x="550" y="370" text-anchor="middle" font-size="12">8s</text>
+                        
+                        <line x1="650" y1="345" x2="650" y2="355" stroke="#333" stroke-width="2"/>
+                        <text x="650" y="370" text-anchor="middle" font-size="12">10s</text>
+                        
+                        <!-- Lifelines -->
+                        <line x1="180" y1="90" x2="180" y2="345" stroke="#3498db" stroke-width="2" stroke-dasharray="5,5"/>
+                        <line x1="180" y1="150" x2="180" y2="345" stroke="#2ecc71" stroke-width="2" stroke-dasharray="5,5"/>
+                        <line x1="180" y1="210" x2="180" y2="345" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5"/>
+                        <line x1="180" y1="270" x2="180" y2="345" stroke="#f39c12" stroke-width="2" stroke-dasharray="5,5"/>
+                        <line x1="180" y1="330" x2="180" y2="345" stroke="#f39c12" stroke-width="2" stroke-dasharray="5,5"/>
+                        
+                        <!-- Initial sleep period (all components) -->
+                        <rect x="50" y="50" width="100" height="20" fill="#3498db" rx="3" opacity="0.3" stroke="#3498db" stroke-width="1" stroke-dasharray="5,3"/>
+                        <text x="100" y="65" text-anchor="middle" font-size="12">Sleep</text>
+                        
+                        <!-- MCU Activity (active until all operations complete) -->
+                        <rect x="150" y="50" width="270" height="20" fill="#3498db" rx="3" opacity="0.8"/>
+                        <rect x="420" y="50" width="230" height="20" fill="#3498db" rx="3" opacity="0.3" stroke="#3498db" stroke-width="1" stroke-dasharray="5,3"/>
+                        <text x="285" y="65" text-anchor="middle" font-size="12" fill="white">Active</text>
+                        <text x="535" y="65" text-anchor="middle" font-size="12">Sleep for remainder of cycle</text>
+                        
+                        <!-- GPS Hot Fix Activity -->
+                        <rect x="150" y="110" width="80" height="20" fill="#e74c3c" rx="3" opacity="0.8"/>
+                        <text x="190" y="150" text-anchor="middle" font-size="12">2s</text>
+                        
+                        <!-- SHT31 Measurement Activity -->
+                        <rect x="230" y="170" width="20" height="20" fill="#2ecc71" rx="3" opacity="0.8"/>
+                        <text x="240" y="210" text-anchor="middle" font-size="12">20ms</text>
+                        
+                        <!-- LoRa TX Activity -->
+                        <rect x="250" y="230" width="40" height="20" fill="#f39c12" rx="3" opacity="0.8"/>
+                        <text x="270" y="270" text-anchor="middle" font-size="12">400ms</text>
+                        
+                        <!-- LoRa RX Activity -->
+                        <rect x="290" y="290" width="130" height="20" fill="#f39c12" rx="3" opacity="0.8"/>
+                        <text x="355" y="330" text-anchor="middle" font-size="12">2s</text>
+                        
+                        <!-- Message Flows -->
+                        <!-- Wake and start GPS -->
+                        <line x1="150" y1="90" x2="150" y2="110" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <text x="140" y="100" text-anchor="end" font-size="12">Wake</text>
+                        
+                        <!-- GPS to MCU -->
+                        <line x1="230" y1="110" x2="230" y2="90" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <text x="210" y="100" text-anchor="end" font-size="12">Fix Data</text>
+                        
+                        <!-- MCU to SHT31 -->
+                        <line x1="230" y1="90" x2="230" y2="170" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <text x="250" y="130" text-anchor="start" font-size="12">Start SHT31</text>
+                        
+                        <!-- SHT31 to MCU -->
+                        <line x1="250" y1="170" x2="250" y2="90" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <text x="270" y="145" text-anchor="start" font-size="12">Data</text>
+                        
+                        <!-- MCU to LoRa TX -->
+                        <line x1="250" y1="90" x2="250" y2="230" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <text x="270" y="205" text-anchor="start" font-size="12">Send Data</text>
+                        
+                        <!-- LoRa TX to RX -->
+                        <line x1="290" y1="240" x2="290" y2="290" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <text x="310" y="270" text-anchor="start" font-size="12">Wait for Response</text>
+                        
+                        <!-- LoRa RX to MCU -->
+                        <line x1="420" y1="290" x2="420" y2="90" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+                        <text x="430" y="200" text-anchor="start" font-size="12">Response Received</text>
+                        
+                        <!-- MCU Sleep Start -->
+                        <path d="M420,70 C430,70 430,100 440,100" stroke="#333" stroke-width="1.5" stroke-dasharray="5,3"/>
+                        <text x="470" y="95" text-anchor="start" font-size="12">MCU enters sleep mode</text>
+                        
+                        <!-- Arrow marker definition -->
+                        <defs>
+                            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                                markerWidth="6" markerHeight="6" orient="auto">
+                                <path d="M 0 0 L 10 5 L 0 10 z" fill="#333"/>
+                            </marker>
+                        </defs>
+                    </svg>
+                </div>
+                <p style="text-align: center; margin-top: 10px;"><em>Swimlane sequence diagram showing the operation flow: Initial idle period (-2s to 0s), MCU wakes at 0s and activates peripherals in sequence (GPS → SHT31 → LoRa TX → LoRa RX), remaining active until all operations complete before entering sleep mode.</em></p>
+            </div>
+        </div>
+
+        <div class="config-grid">
+            <div class="config-card">
+                <h3>System Configuration</h3>
+                <div class="form-group">
+                    <label for="update-interval">Update Interval (minutes)</label>
+                    <input type="number" id="update-interval" value="5" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="simulation-days">Simulation Duration (days)</label>
+                    <input type="number" id="simulation-days" value="3" min="1" max="30">
+                </div>
+                <div class="form-group">
+                    <label for="daylight-hours">Daylight Hours</label>
+                    <input type="number" id="daylight-hours" value="12" min="1" max="24" step="0.5">
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>Battery Properties</h3>
+                <div class="form-group">
+                    <label for="battery-model">Battery Model</label>
+                    <select id="battery-model">
+                        <option value="HTC1015" selected>HTC1015 (40mAh, 2.4±0.2g)</option>
+                        <option value="HTC1020">HTC1020 (50mAh, 3.2±0.5g)</option>
+                        <option value="HTC1030">HTC1030 (100mAh, 4.7±0.5g)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="battery-cells">Cell Configuration</label>
+                    <select id="battery-cells">
+                        <option value="1">1 Cell (2.2V)</option>
+                        <option value="2" selected>2S - 2 Cells in Series (4.4V)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="battery-voltage">Voltage Range (V)</label>
+                    <input type="number" id="battery-voltage" value="4.4" min="0.1" step="0.1">
+                    <small>3.0-5.5V range for 2S LTO configuration</small>
+                </div>
+                <div class="form-group">
+                    <label for="battery-derating">Cold Derating Factor (%)</label>
+                    <input type="number" id="battery-derating" value="50" min="1" max="100">
+                    <small>Severe capacity reduction at -50°C</small>
+                </div>
+                <div class="form-group">
+                    <label for="internal-impedance">Internal Impedance (mΩ)</label>
+                    <input type="number" id="internal-impedance" value="2000" min="1" step="10">
+                    <small>High impedance at -50°C</small>
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>Energy Harvester IC (BQ25570)</h3>
+                <div class="form-group">
+                    <label for="charge-efficiency">Charge Boost Efficiency (%)</label>
+                    <input type="number" id="charge-efficiency" value="70" min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label for="harvester-efficiency">Harvester Efficiency (%)</label>
+                    <input type="number" id="harvester-efficiency" value="85" min="1" max="100">
+                    <small>Overall harvesting circuit efficiency</small>
+                </div>
+                <div class="form-group">
+                    <label for="buck-efficiency">Buck Converter Efficiency (%)</label>
+                    <input type="number" id="buck-efficiency" value="95" min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label for="quiescent-current">Quiescent Current (μA)</label>
+                    <input type="number" id="quiescent-current" value="0.9" min="0.1" step="0.1">
+                    <small>Continuous</small>
+                </div>
+                <div class="form-group">
+                    <label for="charge-limit">Charge Current Limit (mA)</label>
+                    <input type="number" id="charge-limit" value="100" min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label for="bq-weight">Weight (g)</label>
+                    <input type="text" id="bq-weight" value="0.01">
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>Solar Panel</h3>
+                <div class="form-group">
+                    <label for="panel-dimensions">Dimensions (mm)</label>
+                    <input type="text" id="panel-dimensions" value="53x19">
+                </div>
+                <div class="form-group">
+                    <label for="panel-count">Number of Panels</label>
+                    <input type="number" id="panel-count" value="2" min="1" step="1">
+                </div>
+                <div class="form-group">
+                    <label for="solar-current">Single Panel Current (mA)</label>
+                    <input type="number" id="solar-current" value="50" min="0.1" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="solar-voltage">Single Panel Voltage (V)</label>
+                    <input type="number" id="solar-voltage" value="0.5" min="0.1" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="positioning-factor">Positioning Factor (%)</label>
+                    <input type="number" id="positioning-factor" value="80" min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label for="panel-weight">Weight (g)</label>
+                    <input type="text" id="panel-weight" value="0.7">
+                    <small>Per panel</small>
+                </div>
+                <div>
+                    <p id="panel-summary" class="panel-info">Total: 1.0V @ 50mA (50mW)</p>
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>Microcontroller</h3>
+                <div class="form-group">
+                    <label for="mcu-sleep-current">Sleep Current (μA)</label>
+                    <input type="number" id="mcu-sleep-current" value="10" min="0.1" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="mcu-active-current">Active Current (mA)</label>
+                    <input type="number" id="mcu-active-current" value="10" min="0.1" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="mcu-active-time">Active Time (ms)</label>
+                    <input type="number" id="mcu-active-time" value="500" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="mcu-weight">Weight (g)</label>
+                    <input type="text" id="mcu-weight" value="0.5">
+                    <small>Wio E5 (includes LoRa radio)</small>
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>GPS Module</h3>
+                <div class="form-group">
+                    <label for="gps-sleep-current">Sleep Current (μA)</label>
+                    <input type="number" id="gps-sleep-current" value="20" min="0.1" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="gps-active-current">Hot Fix Current (mA)</label>
+                    <input type="number" id="gps-active-current" value="30" min="0.1" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="gps-active-time">Hot Fix Duration (s)</label>
+                    <input type="number" id="gps-active-time" value="2" min="0.1" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="gps-frequency">Acquisition Frequency (every N cycles)</label>
+                    <input type="number" id="gps-frequency" value="1" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="gps-weight">Weight (g)</label>
+                    <input type="text" id="gps-weight" value="0.6">
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>SHT31 Sensor</h3>
+                <div class="form-group">
+                    <label for="sht-sleep-current">Sleep Current (μA)</label>
+                    <input type="number" id="sht-sleep-current" value="0.5" min="0.1" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="sht-active-current">Active Current (mA)</label>
+                    <input type="number" id="sht-active-current" value="1" min="0.1" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="sht-active-time">Measurement Time (ms)</label>
+                    <input type="number" id="sht-active-time" value="20" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="sht-weight">Weight (g)</label>
+                    <input type="text" id="sht-weight" value="0.01">
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>LoRaWAN Transmission</h3>
+                <div class="form-group">
+                    <label for="lora-sleep-current">Sleep Current (μA)</label>
+                    <input type="number" id="lora-sleep-current" value="2" min="0.1" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="lora-tx-current">TX Current (mA)</label>
+                    <input type="number" id="lora-tx-current" value="118" min="0.1" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="lora-tx-time">TX Duration (ms)</label>
+                    <input type="number" id="lora-tx-time" value="400" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="lora-rx-current">RX Current (mA)</label>
+                    <input type="number" id="lora-rx-current" value="6.7" min="0.1" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="lora-rx-time">RX Duration (s)</label>
+                    <input type="number" id="lora-rx-time" value="2" min="0.1" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label for="lora-frequency">TX/RX Frequency (every N cycles)</label>
+                    <input type="number" id="lora-frequency" value="1" min="1">
+                </div>
+            </div>
+
+            <div class="config-card">
+                <h3>Actions</h3>
+                <button id="calculate-button">Calculate Power Budget</button>
+                <p>Make changes to any parameters and click the button to recalculate.</p>
+            </div>
+        </div>
+
+        <div class="result-panel">
+            <h2>Power Budget Summary</h2>
+            <div id="summary-result"></div>
+            <table id="summary-table">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Average Current (mA)</th>
+                        <th>Daily Energy (mAh)</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody id="summary-tbody"></tbody>
+            </table>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h2>Power Consumption Distribution</h2>
+                <canvas id="pie-chart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h2>Battery Capacity Over Time</h2>
+                <canvas id="timeline-chart"></canvas>
+                <div class="timeline-legend" id="timeline-legend"></div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h2>Battery Voltage During One Cycle</h2>
+            <p class="subtitle">Showing voltage droop due to internal impedance (2000mΩ at -50°C) during active operation</p>
+            <p>Note: This shows the voltage droop caused by the high internal resistance at extreme cold temperature. The 2Ω internal resistance creates significant voltage sag during peak current operations. The power budget calculation does not account for this voltage drop, which may cause components to behave unpredictably if voltage drops below minimum operating thresholds.</p>
+            <canvas id="voltage-chart"></canvas>
+            <div class="timeline-legend" id="voltage-legend"></div>
+        </div>
+        
+        <div class="result-panel">
+            <h2>Weight Budget Summary</h2>
+            <table id="weight-table">
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Weight (g)</th>
+                        <th>Quantity</th>
+                        <th>Total (g)</th>
+                    </tr>
+                </thead>
+                <tbody id="weight-tbody">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="3">Total System Weight</th>
+                        <th id="total-weight">0.0 g</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Main data object to store all configuration
+        const config = {
+            system: {
+                updateInterval: 5, // minutes
+                simulationDays: 3,
+                daylightHours: 12
+            },
+            battery: {
+                capacity: 50, // mAh
+                voltage: 2.2, // V
+                chargeEfficiency: 70, // %
+                dischargeEfficiency: 95 // %
+            },
+            solar: {
+                dimensions: "53x19", // mm
+                current: 50, // mA
+                voltage: 0.5, // V
+                count: 2, // number of panels
+                positioningFactor: 80 // %
+            },
+            microcontroller: {
+                sleepCurrent: 10, // μA
+                activeCurrent: 10, // mA
+                activeTime: 500 // ms
+            },
+            gps: {
+                sleepCurrent: 20, // μA
+                activeCurrent: 30, // mA
+                activeTime: 2, // seconds
+                frequency: 1 // every N cycles
+            },
+            sht31: {
+                sleepCurrent: 0.5, // μA
+                activeCurrent: 1, // mA
+                activeTime: 20 // ms
+            },
+            lora: {
+                sleepCurrent: 2, // μA
+                txCurrent: 118, // mA
+                txTime: 400, // ms
+                rxCurrent: 6.7, // mA
+                rxTime: 2000, // ms (2 seconds)
+                frequency: 1 // every N cycles
+            }
+        };
+
+        // Chart objects
+        let pieChart = null;
+        let timelineChart = null;
+        let voltageChart = null;
+
+        // Function to read all input values and update config
+        function readInputValues() {
+            // System
+            config.system.updateInterval = parseFloat(document.getElementById('update-interval').value);
+            config.system.simulationDays = parseInt(document.getElementById('simulation-days').value);
+            config.system.daylightHours = parseFloat(document.getElementById('daylight-hours').value);
+            
+            // Battery
+            const batteryModel = document.getElementById('battery-model').value;
+            const batteryCells = parseInt(document.getElementById('battery-cells').value);
+            
+            // Set battery capacity based on model and cell count
+            // Get cell configuration - 2S means series (voltage adds, capacity same)
+            const isSeriesConfig = document.getElementById('battery-cells').selectedOptions[0].text.includes('2S');
+            
+            // Calculate nominal capacity before derating
+            switch(batteryModel) {
+                case 'HTC1015':
+                    // In series: capacity stays at 40mAh, in parallel: capacity doubles to 80mAh
+                    config.battery.nominalCapacity = isSeriesConfig ? 40 : (40 * batteryCells);
+                    config.battery.weight = '2.4±0.2';
+                    break;
+                case 'HTC1030':
+                    config.battery.nominalCapacity = isSeriesConfig ? 100 : (100 * batteryCells);
+                    config.battery.weight = '4.7±0.5';
+                    break;
+                case 'HTC1020':
+                default:
+                    config.battery.nominalCapacity = isSeriesConfig ? 50 : (50 * batteryCells);
+                    config.battery.weight = '3.2±0.5';
+            }
+            
+            config.battery.voltage = parseFloat(document.getElementById('battery-voltage').value);
+            config.battery.chargeEfficiency = parseFloat(document.getElementById('charge-efficiency').value);
+            config.battery.buckEfficiency = parseFloat(document.getElementById('buck-efficiency').value);
+            
+            // Set a fixed battery discharge efficiency - this is different from buck converter efficiency
+            config.battery.dischargeEfficiency = 95; // %
+            
+            // Get cold derating factor and apply to battery capacity
+            let derating = 1.0; // Default: no derating
+            if (document.getElementById('battery-derating')) {
+                derating = parseFloat(document.getElementById('battery-derating').value) / 100;
+            }
+            config.battery.derating = derating;
+            config.battery.capacity = config.battery.nominalCapacity * derating;
+            
+            // Solar
+            config.solar.count = parseInt(document.getElementById('panel-count').value);
+            config.solar.current = parseFloat(document.getElementById('solar-current').value);
+            config.solar.voltage = parseFloat(document.getElementById('solar-voltage').value);
+            config.solar.positioningFactor = parseFloat(document.getElementById('positioning-factor').value);
+            
+            // Update panel summary
+            const totalVoltage = config.solar.voltage * config.solar.count;
+            const totalCurrent = config.solar.current; // Current stays the same with panels in series
+            const totalPower = totalVoltage * totalCurrent;
+            document.getElementById('panel-summary').innerText = 
+                `Total: ${totalVoltage.toFixed(1)}V @ ${totalCurrent.toFixed(0)}mA (${totalPower.toFixed(0)}mW)`;
+            
+            // Microcontroller
+            config.microcontroller.sleepCurrent = parseFloat(document.getElementById('mcu-sleep-current').value);
+            config.microcontroller.activeCurrent = parseFloat(document.getElementById('mcu-active-current').value);
+            config.microcontroller.activeTime = parseFloat(document.getElementById('mcu-active-time').value);
+            
+            // GPS
+            config.gps.sleepCurrent = parseFloat(document.getElementById('gps-sleep-current').value);
+            config.gps.activeCurrent = parseFloat(document.getElementById('gps-active-current').value);
+            config.gps.activeTime = parseFloat(document.getElementById('gps-active-time').value);
+            config.gps.frequency = parseInt(document.getElementById('gps-frequency').value);
+            
+            // SHT31
+            config.sht31.sleepCurrent = parseFloat(document.getElementById('sht-sleep-current').value);
+            config.sht31.activeCurrent = parseFloat(document.getElementById('sht-active-current').value);
+            config.sht31.activeTime = parseFloat(document.getElementById('sht-active-time').value);
+            
+            // LoRaWAN
+            config.lora.sleepCurrent = parseFloat(document.getElementById('lora-sleep-current').value);
+            config.lora.txCurrent = parseFloat(document.getElementById('lora-tx-current').value);
+            config.lora.txTime = parseFloat(document.getElementById('lora-tx-time').value);
+            config.lora.rxCurrent = parseFloat(document.getElementById('lora-rx-current').value);
+            config.lora.rxTime = parseFloat(document.getElementById('lora-rx-time').value) * 1000; // Convert to ms
+            config.lora.frequency = parseInt(document.getElementById('lora-frequency').value);
+        }
+
+        // Calculate and populate the weight budget table
+        function updateWeightBudget() {
+            const tbody = document.getElementById('weight-tbody');
+            tbody.innerHTML = '';
+            
+            // Get panel count
+            const panelCount = parseInt(document.getElementById('panel-count').value);
+            
+            // Get component weights from config object
+            const batteryWeight = config.battery.weight;
+            const panelWeight = parseFloat(document.getElementById('panel-weight').value);
+            const mcuWeight = parseFloat(document.getElementById('mcu-weight').value);
+            const gpsWeight = parseFloat(document.getElementById('gps-weight').value);
+            const shtWeight = parseFloat(document.getElementById('sht-weight').value);
+            const bqWeight = parseFloat(document.getElementById('bq-weight').value);
+            
+            // Get the selected battery model name
+            const batteryElement = document.getElementById('battery-model');
+            const batteryModelName = batteryElement.options[batteryElement.selectedIndex].text.split(' ')[0];
+            const batteryCells = parseInt(document.getElementById('battery-cells').value);
+            
+            // Create weight items array
+            const weightItems = [
+                { name: `LTO Battery (${batteryModelName})`, weight: batteryWeight, quantity: batteryCells },
+                { name: 'Solar Panel', weight: panelWeight, quantity: panelCount },
+                { name: 'Microcontroller/LoRa (Wio E5)', weight: mcuWeight, quantity: 1 },
+                { name: 'GPS Module', weight: gpsWeight, quantity: 1 },
+                { name: 'SHT31 Sensor', weight: shtWeight, quantity: 1 },
+                { name: 'BQ25570 Energy Harvester', weight: bqWeight, quantity: 1 },
+                { name: 'PCB, Antenna, and Harnessing', weight: 1.0, quantity: 1 }
+            ];
+            
+            // Calculate total weight and populate table
+            let totalWeight = 0;
+            
+            weightItems.forEach(item => {
+                // Handle battery weight which has ± format
+                let itemWeight, itemTotal;
+                if (typeof item.weight === 'string' && item.weight.includes('±')) {
+                    const parts = item.weight.split('±');
+                    const nominalWeight = parseFloat(parts[0]);
+                    itemTotal = nominalWeight * item.quantity;
+                    totalWeight += itemTotal;
+                    itemWeight = item.weight;
+                } else {
+                    itemTotal = item.weight * item.quantity;
+                    totalWeight += itemTotal;
+                    itemWeight = item.weight.toString();
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${itemWeight}</td>
+                    <td>${item.quantity}</td>
+                    <td>${itemTotal.toFixed(2)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Update total weight
+            document.getElementById('total-weight').textContent = totalWeight.toFixed(2) + ' g';
+        }
+        
+        // Calculate power budget
+        function calculatePowerBudget() {
+            // Read values from inputs
+            readInputValues();
+            
+            // Total cycle time in minutes
+            const cycleTimeMinutes = config.system.updateInterval;
+            // Convert to milliseconds for calculations
+            const cycleTimeMs = cycleTimeMinutes * 60 * 1000;
+            
+            // Get buck converter settings (for GPS and SHT31)
+            const buckEfficiency = document.getElementById('buck-efficiency') ? 
+                parseFloat(document.getElementById('buck-efficiency').value) / 100 : 0.95;
+            const buckVoltage = document.getElementById('buck-voltage') ? 
+                parseFloat(document.getElementById('buck-voltage').value) : 1.8;
+            const batteryVoltage = config.battery.voltage;
+            
+            // Calculate component consumption
+            const componentConsumption = {};
+            
+            // Calculate active times for each component
+            // GPS active time
+            const gpsActiveTimePerCycle = config.gps.frequency === 0 ? 0 : 
+                (config.gps.activeTime * 1000) / config.gps.frequency; // ms, adjusted for frequency
+            
+            // LoRaWAN TX time
+            const loraTxTimePerCycle = config.lora.frequency === 0 ? 0 : 
+                config.lora.txTime / config.lora.frequency; // ms, adjusted for frequency
+            
+            // LoRaWAN RX time
+            const loraRxTimePerCycle = config.lora.frequency === 0 ? 0 : 
+                config.lora.rxTime / config.lora.frequency; // ms, adjusted for frequency
+            
+            // SHT31 active time
+            const shtActiveTimePerCycle = config.sht31.activeTime; // ms
+            
+            // Total peripheral active time when MCU must also be active
+            const peripheralActiveTime = loraTxTimePerCycle + loraRxTimePerCycle + gpsActiveTimePerCycle + shtActiveTimePerCycle;
+            
+            // MCU calculations - ensure MCU is active at least as long as peripherals require
+            const mcuBaseActiveTime = config.microcontroller.activeTime; // ms - basic MCU operations
+            const mcuActiveTimePerCycle = Math.max(mcuBaseActiveTime, peripheralActiveTime); // ms - total active time
+            const mcuSleepTimePerCycle = cycleTimeMs - mcuActiveTimePerCycle; // ms - remaining time for sleep
+            
+            const mcuActiveCurrent = config.microcontroller.activeCurrent; // mA
+            const mcuSleepCurrent = config.microcontroller.sleepCurrent / 1000; // Convert μA to mA
+            
+            const mcuActiveEnergy = (mcuActiveCurrent * mcuActiveTimePerCycle) / (60 * 60 * 1000); // mAh
+            const mcuSleepEnergy = (mcuSleepCurrent * mcuSleepTimePerCycle) / (60 * 60 * 1000); // mAh
+            
+            const mcuTotalEnergyPerCycle = mcuActiveEnergy + mcuSleepEnergy; // mAh
+            const mcuAverageCurrent = mcuTotalEnergyPerCycle / (cycleTimeMinutes / 60); // mA
+            
+            componentConsumption.mcu = {
+                averageCurrent: mcuAverageCurrent,
+                dailyEnergy: (mcuTotalEnergyPerCycle * 24 * 60) / cycleTimeMinutes // mAh per day
+            };
+            
+            // GPS calculations - Apply buck converter efficiency
+            const gpsSleepTimePerCycle = cycleTimeMs - gpsActiveTimePerCycle; // ms
+            
+            const gpsActiveCurrent = config.gps.activeCurrent; // mA
+            const gpsSleepCurrent = config.gps.sleepCurrent / 1000; // Convert μA to mA
+            
+            // Apply buck converter voltage transformation and efficiency to GPS
+            // Formula: I_battery = (I_device * V_device) / (efficiency * V_battery)
+            const gpsActiveBatteryCurrent = (gpsActiveCurrent * buckVoltage) / (buckEfficiency * batteryVoltage);
+            const gpsSleepBatteryCurrent = (gpsSleepCurrent * buckVoltage) / (buckEfficiency * batteryVoltage);
+            
+            const gpsActiveEnergy = config.gps.frequency === 0 ? 0 : 
+                (gpsActiveBatteryCurrent * gpsActiveTimePerCycle) / (60 * 60 * 1000); // mAh
+            const gpsSleepEnergy = (gpsSleepBatteryCurrent * gpsSleepTimePerCycle) / (60 * 60 * 1000); // mAh
+            
+            const gpsTotalEnergyPerCycle = gpsActiveEnergy + gpsSleepEnergy; // mAh
+            const gpsAverageCurrent = gpsTotalEnergyPerCycle / (cycleTimeMinutes / 60); // mA
+            
+            componentConsumption.gps = {
+                averageCurrent: gpsAverageCurrent,
+                dailyEnergy: (gpsTotalEnergyPerCycle * 24 * 60) / cycleTimeMinutes, // mAh per day
+                deviceCurrent: config.gps.activeCurrent, // The current actually consumed by the device
+                buckEfficiency: buckEfficiency // Store efficiency factor for reference
+            };
+            
+            // SHT31 calculations - Apply buck converter efficiency
+            const shtSleepTimePerCycle = cycleTimeMs - shtActiveTimePerCycle; // ms
+            
+            const shtActiveCurrent = config.sht31.activeCurrent; // mA
+            const shtSleepCurrent = config.sht31.sleepCurrent / 1000; // Convert μA to mA
+            
+            // Apply buck converter voltage transformation and efficiency to SHT31
+            // Formula: I_battery = (I_device * V_device) / (efficiency * V_battery)
+            const shtActiveBatteryCurrent = (shtActiveCurrent * buckVoltage) / (buckEfficiency * batteryVoltage);
+            const shtSleepBatteryCurrent = (shtSleepCurrent * buckVoltage) / (buckEfficiency * batteryVoltage);
+            
+            const shtActiveEnergy = (shtActiveBatteryCurrent * shtActiveTimePerCycle) / (60 * 60 * 1000); // mAh
+            const shtSleepEnergy = (shtSleepBatteryCurrent * shtSleepTimePerCycle) / (60 * 60 * 1000); // mAh
+            
+            const shtTotalEnergyPerCycle = shtActiveEnergy + shtSleepEnergy; // mAh
+            const shtAverageCurrent = shtTotalEnergyPerCycle / (cycleTimeMinutes / 60); // mA
+            
+            componentConsumption.sht = {
+                averageCurrent: shtAverageCurrent,
+                dailyEnergy: (shtTotalEnergyPerCycle * 24 * 60) / cycleTimeMinutes, // mAh per day
+                deviceCurrent: config.sht31.activeCurrent, // The current actually consumed by the device
+                buckEfficiency: buckEfficiency // Store efficiency factor for reference
+            };
+                
+            // LoRaWAN calculations
+            const loraSleepTimePerCycle = cycleTimeMs - (loraTxTimePerCycle + loraRxTimePerCycle); // ms
+            
+            const loraTxCurrent = config.lora.txCurrent; // mA
+            const loraRxCurrent = config.lora.rxCurrent; // mA
+            const loraSleepCurrent = config.lora.sleepCurrent / 1000; // Convert μA to mA
+            
+            const loraTxEnergy = config.lora.frequency === 0 ? 0 : 
+                (loraTxCurrent * loraTxTimePerCycle) / (60 * 60 * 1000); // mAh
+            const loraRxEnergy = config.lora.frequency === 0 ? 0 : 
+                (loraRxCurrent * loraRxTimePerCycle) / (60 * 60 * 1000); // mAh
+            const loraSleepEnergy = (loraSleepCurrent * loraSleepTimePerCycle) / (60 * 60 * 1000); // mAh
+            
+            const loraTotalEnergyPerCycle = loraTxEnergy + loraRxEnergy + loraSleepEnergy; // mAh
+            const loraAverageCurrent = loraTotalEnergyPerCycle / (cycleTimeMinutes / 60); // mA
+            
+            componentConsumption.lora = {
+                averageCurrent: loraAverageCurrent,
+                dailyEnergy: (loraTotalEnergyPerCycle * 24 * 60) / cycleTimeMinutes // mAh per day
+            };
+            
+            // Calculate solar input
+            const solarCurrent = config.solar.current; // mA
+            const solarVoltage = config.solar.voltage * config.solar.count; // V (panels in series)
+            const chargeEfficiency = config.battery.chargeEfficiency / 100; // Use battery charge efficiency for conversion losses
+            const positioningFactor = config.solar.positioningFactor / 100;
+            
+            // Account for charge efficiency (voltage conversion)
+            // Power in = Power out / efficiency
+            // Power = Voltage * Current
+            // batteryVoltage is already declared above
+            
+            // Calculate effective current at battery voltage after conversion
+            const solarPowerInput = solarCurrent * solarVoltage; // mW
+            const batteryPowerInput = solarPowerInput * chargeEfficiency; // mW after conversion losses
+            const effectiveBatteryCurrent = batteryPowerInput / batteryVoltage; // mA at battery voltage
+            
+            // Average solar current considering positioning and day/night cycle
+            const effectiveDaylightHours = config.system.daylightHours;
+            const avgSolarCurrent = effectiveBatteryCurrent * positioningFactor * 
+                                   (effectiveDaylightHours / 24);
+            
+            const dailySolarEnergy = avgSolarCurrent * 24; // mAh per day
+            
+            // BQ25570 quiescent current calculations
+            const bqQuiescentCurrent = document.getElementById('quiescent-current') ? 
+                parseFloat(document.getElementById('quiescent-current').value) / 1000 : 0.0009; // Convert μA to mA
+            
+            // Quiescent current is continuous
+            const bqQuiescentEnergy = bqQuiescentCurrent * 24; // mAh per day (continuous)
+            
+            componentConsumption.bq = {
+                averageCurrent: bqQuiescentCurrent,
+                dailyEnergy: bqQuiescentEnergy
+            };
+            
+            // Total consumption
+            const totalConsumption = {
+                averageCurrent: componentConsumption.mcu.averageCurrent + 
+                                componentConsumption.gps.averageCurrent + 
+                                componentConsumption.sht.averageCurrent + 
+                                componentConsumption.lora.averageCurrent +
+                                componentConsumption.bq.averageCurrent,
+                dailyEnergy: componentConsumption.mcu.dailyEnergy + 
+                            componentConsumption.gps.dailyEnergy + 
+                            componentConsumption.sht.dailyEnergy + 
+                            componentConsumption.lora.dailyEnergy +
+                            componentConsumption.bq.dailyEnergy
+            };
+            
+            // Energy balance
+            const energyBalance = dailySolarEnergy - totalConsumption.dailyEnergy;
+            
+            // For pie chart - consumption distribution
+            const pieData = {
+                labels: ['Microcontroller', 'GPS', 'SHT31', 'LoRaWAN', 'BQ25570'],
+                datasets: [{
+                    data: [
+                        componentConsumption.mcu.dailyEnergy,
+                        componentConsumption.gps.dailyEnergy,
+                        componentConsumption.sht.dailyEnergy,
+                        componentConsumption.lora.dailyEnergy,
+                        componentConsumption.bq.dailyEnergy
+                    ],
+                    backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6'],
+                    borderColor: ['#2980b9', '#c0392b', '#27ae60', '#e67e22', '#8e44ad'],
+                    borderWidth: 1
+                }]
+            };
+            
+            // Battery simulation over time
+            const batterySimulation = simulateBatteryOverTime(
+                config.battery.capacity,
+                componentConsumption,
+                avgSolarCurrent,
+                config.system.simulationDays,
+                config.system.daylightHours,
+                config.battery.chargeEfficiency / 100
+            );
+            
+            // Format percentages for display
+            const formatPercentage = (value) => (value * 100).toFixed(1) + '%';
+            
+            // Update summary display
+            const summaryElement = document.getElementById('summary-result');
+            
+            // Determine if energy balance is positive or negative
+            const isBalancePositive = energyBalance >= 0;
+            
+            summaryElement.innerHTML = `
+                <p><strong>Total Average Current:</strong> ${totalConsumption.averageCurrent.toFixed(3)} mA</p>
+                <p><strong>Total Daily Energy Consumption:</strong> ${totalConsumption.dailyEnergy.toFixed(2)} mAh</p>
+                <p><strong>Daily Solar Energy Generation:</strong> ${dailySolarEnergy.toFixed(2)} mAh</p>
+                <p><strong>Energy Balance:</strong> <span class="${isBalancePositive ? 'success' : 'warning'}">
+                    ${energyBalance.toFixed(2)} mAh/day (${isBalancePositive ? 'Surplus' : 'Deficit'})
+                </span></p>
+                <p><strong>Battery Life with no Solar:</strong> ${(config.battery.capacity / totalConsumption.dailyEnergy).toFixed(1)} days</p>
+            `;
+            
+            // Update summary table
+            const tbody = document.getElementById('summary-tbody');
+            tbody.innerHTML = '';
+            
+            const components = [
+                { name: 'Microcontroller', data: componentConsumption.mcu },
+                { name: 'GPS Module', data: componentConsumption.gps },
+                { name: 'SHT31 Sensor', data: componentConsumption.sht },
+                { name: 'LoRaWAN', data: componentConsumption.lora },
+                { name: 'BQ25570', data: componentConsumption.bq },
+                { name: 'Total', data: totalConsumption }
+            ];
+            
+            components.forEach(component => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${component.name}</td>
+                    <td>${component.data.averageCurrent.toFixed(3)} mA</td>
+                    <td>${component.data.dailyEnergy.toFixed(2)} mAh</td>
+                    <td>${component.name === 'Total' ? '100.0%' : 
+                        formatPercentage(component.data.dailyEnergy / totalConsumption.dailyEnergy)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Calculate voltage droop during one cycle
+            const internalImpedance = document.getElementById('internal-impedance') ? 
+                parseFloat(document.getElementById('internal-impedance').value) / 1000 : 0.4; // Convert to Ohms
+            
+            const voltageData = calculateVoltageDroop(
+                config.battery.voltage,
+                internalImpedance,
+                config.microcontroller,
+                config.gps,
+                config.sht31,
+                config.lora
+            );
+            
+            // Update charts and weight budget
+            updatePieChart(pieData);
+            updateTimelineChart(batterySimulation);
+            updateVoltageChart(voltageData);
+            updateWeightBudget();
+        }
+        
+        // Simulate battery level over time
+        function simulateBatteryOverTime(
+            initialCapacity, 
+            componentConsumption, 
+            avgSolarCurrent, 
+            days, 
+            daylightHours,
+            chargeEfficiency
+        ) {
+            // Calculate nominal (room temperature) capacity
+            const nominalCapacity = config.battery.nominalCapacity;
+            const hoursPerDay = 24;
+            const totalHours = days * hoursPerDay;
+            
+            // Calculate consumption per hour
+            const hourlyConsumption = {
+                mcu: componentConsumption.mcu.dailyEnergy / hoursPerDay,
+                gps: componentConsumption.gps.dailyEnergy / hoursPerDay,
+                sht: componentConsumption.sht.dailyEnergy / hoursPerDay,
+                lora: componentConsumption.lora.dailyEnergy / hoursPerDay,
+                bq: componentConsumption.bq.dailyEnergy / hoursPerDay
+            };
+            
+            const totalHourlyConsumption = Object.values(hourlyConsumption).reduce((sum, val) => sum + val, 0);
+            
+            // Calculate effective solar input
+            const effectiveSolarCurrent = avgSolarCurrent * (24 / daylightHours);
+            
+            // Initialize simulation data
+            const batteryLevels = [];
+            const solarInputs = [];
+            const powerConsumptions = [];
+            const labels = [];
+            
+            let currentCapacity = initialCapacity;
+            
+            // Simulate hour by hour
+            for (let hour = 0; hour < totalHours; hour++) {
+                // Determine if it's day or night
+                const hourOfDay = hour % hoursPerDay;
+                const isDaytime = hourOfDay >= (hoursPerDay - daylightHours) / 2 && 
+                                 hourOfDay < (hoursPerDay + daylightHours) / 2;
+                
+                // Calculate solar input for this hour
+                const hourlySolarInput = isDaytime ? effectiveSolarCurrent : 0;
+                const solarEnergyInput = hourlySolarInput * chargeEfficiency;
+                
+                // Calculate consumption for this hour
+                // No need for an overall discharge efficiency since buck efficiency is already
+                // applied to the appropriate components (GPS, SHT31) in their calculations
+                const hourlyEnergyConsumption = totalHourlyConsumption;
+                
+                // Update battery capacity
+                currentCapacity = Math.min(
+                    initialCapacity, // Max capacity
+                    Math.max(0, currentCapacity + solarEnergyInput - hourlyEnergyConsumption) // Don't go below 0
+                );
+                
+                // Add data points
+                batteryLevels.push(currentCapacity);
+                solarInputs.push(solarEnergyInput);
+                powerConsumptions.push(hourlyEnergyConsumption);
+                
+                // Format label as "Day X, HH:00"
+                const day = Math.floor(hour / hoursPerDay) + 1;
+                const hourLabel = hourOfDay;
+                labels.push(`Day ${day}, ${hourLabel}:00`);
+            }
+            
+            return {
+                labels,
+                batteryLevels,
+                solarInputs,
+                powerConsumptions,
+                nominalCapacity
+            };
+        }
+        
+        // Update pie chart with new data
+        function updatePieChart(data) {
+            const ctx = document.getElementById('pie-chart').getContext('2d');
+            
+            if (pieChart) {
+                pieChart.destroy();
+            }
+            
+            pieChart = new Chart(ctx, {
+                type: 'pie',
+                data: data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw.toFixed(2);
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.raw / total) * 100).toFixed(1);
+                                    return `${label}: ${value} mAh (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update timeline chart with new data
+        function updateTimelineChart(data) {
+            const ctx = document.getElementById('timeline-chart').getContext('2d');
+            
+            if (timelineChart) {
+                timelineChart.destroy();
+            }
+            
+            // Filter to show only every N labels for readability
+            const skipFactor = Math.max(1, Math.floor(data.labels.length / 24));
+            const filteredLabels = data.labels.filter((label, index) => index % skipFactor === 0);
+            
+            // Create a dataset for the nominal capacity (room temperature) - a constant value
+            const nominalCapacityData = Array(data.labels.length).fill(data.nominalCapacity);
+            
+            timelineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        {
+                            label: 'Battery Level at -50°C (mAh)',
+                            data: data.batteryLevels,
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Solar Input (mAh)',
+                            data: data.solarInputs,
+                            borderColor: '#f1c40f',
+                            backgroundColor: 'rgba(241, 196, 15, 0.1)',
+                            borderWidth: 1,
+                            fill: false,
+                            tension: 0,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Room Temp Capacity (mAh)',
+                            data: nominalCapacityData,
+                            borderColor: '#e74c3c',
+                            borderWidth: 2,
+                            borderDash: [6, 6],
+                            fill: false,
+                            tension: 0,
+                            yAxisID: 'y'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                maxTicksLimit: 24,
+                                callback: function(value, index, values) {
+                                    if (index % skipFactor === 0) {
+                                        return data.labels[index];
+                                    }
+                                    return '';
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Energy (mAh)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Update legend
+            updateTimelineLegend();
+        }
+        
+        // Update the timeline legend
+        function updateTimelineLegend() {
+            const legendElement = document.getElementById('timeline-legend');
+            legendElement.innerHTML = '';
+            
+            const legendItems = [
+                { label: 'Battery Level at -50°C', color: '#3498db' },
+                { label: 'Solar Input', color: '#f1c40f' },
+                { label: 'Room Temp Capacity', color: '#e74c3c', dashed: true }
+            ];
+            
+            legendItems.forEach(item => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+                
+                const colorBox = document.createElement('div');
+                colorBox.className = 'legend-color';
+                colorBox.style.backgroundColor = item.color;
+                
+                // For dashed items, add a dash pattern
+                if (item.dashed) {
+                    colorBox.style.backgroundImage = 
+                        `linear-gradient(90deg, ${item.color} 50%, transparent 50%, transparent)`;
+                    colorBox.style.backgroundSize = '6px 100%';
+                }
+                
+                const label = document.createElement('span');
+                label.textContent = item.label;
+                
+                legendItem.appendChild(colorBox);
+                legendItem.appendChild(label);
+                
+                legendElement.appendChild(legendItem);
+            });
+        }
+        
+        // Calculate voltage droop during one cycle based on component currents and internal impedance
+        function calculateVoltageDroop(nominalVoltage, internalImpedance, mcuConfig, gpsConfig, shtConfig, loraConfig) {
+            const timeStepMs = 50; // 50ms time steps for good resolution
+            const totalTimeMs = 7000; // 7 seconds total (shortened from original 10s)
+            
+            // Create time points array (-2s to 10s)
+            const timePoints = [];
+            const voltagePoints = [];
+            const currentPoints = [];
+            const componentCurrents = []; // To track individual component contributions
+            
+            // Pre-populate with component current arrays
+            componentCurrents.push({name: 'MCU', values: [], color: '#3498db'});
+            componentCurrents.push({name: 'GPS', values: [], color: '#e74c3c'});
+            componentCurrents.push({name: 'SHT31', values: [], color: '#2ecc71'});
+            componentCurrents.push({name: 'LoRa', values: [], color: '#f39c12'});
+            
+            // Define component activities based on the sequence diagram
+            const activities = [
+                {
+                    component: 'MCU',
+                    startMs: 0,    // 0s
+                    endMs: 4200,   // 4.2s (GPS + SHT + LoRa TX + LoRa RX)
+                    current: mcuConfig.activeCurrent // mA
+                },
+                {
+                    component: 'MCU',
+                    startMs: -2000, // -2s
+                    endMs: 0,      // 0s
+                    current: mcuConfig.sleepCurrent / 1000 // μA to mA
+                },
+                {
+                    component: 'MCU',
+                    startMs: 4200, // 4.2s
+                    endMs: 7000,  // 7s (shortened from original 10s)
+                    current: mcuConfig.sleepCurrent / 1000 // μA to mA
+                },
+                {
+                    component: 'GPS',
+                    startMs: 0,    // 0s
+                    endMs: 2000,   // 2s
+                    current: gpsConfig.activeCurrent // mA
+                },
+                {
+                    component: 'GPS',
+                    startMs: -2000, // -2s
+                    endMs: 0,      // 0s
+                    current: gpsConfig.sleepCurrent / 1000 // μA to mA
+                },
+                {
+                    component: 'GPS',
+                    startMs: 2000, // 2s
+                    endMs: 7000,  // 7s (shortened from original 10s)
+                    current: gpsConfig.sleepCurrent / 1000 // μA to mA
+                },
+                {
+                    component: 'SHT31',
+                    startMs: 2000, // 2s
+                    endMs: 2020,   // 2s + 20ms
+                    current: shtConfig.activeCurrent // mA
+                },
+                {
+                    component: 'SHT31',
+                    startMs: -2000, // -2s
+                    endMs: 2000,    // 2s
+                    current: shtConfig.sleepCurrent / 1000 // μA to mA
+                },
+                {
+                    component: 'SHT31',
+                    startMs: 2020,  // 2.02s
+                    endMs: 7000,   // 7s (shortened from original 10s)
+                    current: shtConfig.sleepCurrent / 1000 // μA to mA
+                },
+                {
+                    component: 'LoRa',
+                    startMs: 2020,  // 2.02s
+                    endMs: 2420,    // 2.02s + 400ms (TX)
+                    current: loraConfig.txCurrent // mA
+                },
+                {
+                    component: 'LoRa',
+                    startMs: 2420,  // 2.42s
+                    endMs: 4200,    // 2.42s + 1.78s (~2s for RX minus rounding)
+                    current: loraConfig.rxCurrent // mA
+                },
+                {
+                    component: 'LoRa',
+                    startMs: -2000, // -2s
+                    endMs: 2020,    // 2.02s
+                    current: loraConfig.sleepCurrent / 1000 // μA to mA
+                },
+                {
+                    component: 'LoRa',
+                    startMs: 4200,  // 4.2s
+                    endMs: 7000,   // 7s (shortened from original 10s)
+                    current: loraConfig.sleepCurrent / 1000 // μA to mA
+                }
+            ];
+            
+            // Calculate for each time step
+            for (let timeMs = -2000; timeMs <= totalTimeMs; timeMs += timeStepMs) {
+                timePoints.push(timeMs / 1000); // Convert to seconds for display
+                
+                // Initialize component currents for this time step
+                componentCurrents.forEach(comp => {
+                    comp.values.push(0);
+                });
+                
+                // Sum all currents active at this time step
+                let totalCurrent = 0;
+                
+                activities.forEach(activity => {
+                    if (timeMs >= activity.startMs && timeMs < activity.endMs) {
+                        // Find component index
+                        const compIndex = componentCurrents.findIndex(c => c.name === activity.component);
+                        if (compIndex !== -1) {
+                            componentCurrents[compIndex].values[componentCurrents[compIndex].values.length - 1] = activity.current;
+                            totalCurrent += activity.current;
+                        }
+                    }
+                });
+                
+                currentPoints.push(totalCurrent);
+                
+                // Calculate voltage droop: V = V_nominal - I * R_internal
+                // Convert current from mA to A for correct calculation with ohms
+                const currentInAmps = totalCurrent / 1000; // Convert mA to A
+                const voltage = nominalVoltage - (currentInAmps * internalImpedance);
+                voltagePoints.push(voltage);
+            }
+            
+            return {
+                timePoints,
+                voltagePoints,
+                currentPoints,
+                componentCurrents
+            };
+        }
+        
+        // Update voltage chart with new data
+        function updateVoltageChart(data) {
+            const ctx = document.getElementById('voltage-chart').getContext('2d');
+            
+            if (voltageChart) {
+                voltageChart.destroy();
+            }
+            
+            // Create datasets for each component's current
+            const componentDatasets = data.componentCurrents.map(comp => {
+                return {
+                    label: `${comp.name} Current (mA)`,
+                    data: comp.values,
+                    borderColor: comp.color,
+                    backgroundColor: comp.color + '33', // Add transparency
+                    borderWidth: 1,
+                    fill: true,
+                    yAxisID: 'y1',
+                    order: 2,
+                    hidden: false, // Show by default
+                    stacked: true
+                };
+            });
+            
+            // Add voltage dataset
+            const datasets = [
+                {
+                    label: 'Battery Voltage (V)',
+                    data: data.voltagePoints,
+                    borderColor: '#9b59b6',  // Changed to purple to distinguish from GPS red
+                    backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.1,
+                    yAxisID: 'y',
+                    order: 1
+                },
+                ...componentDatasets
+            ];
+            
+            voltageChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.timePoints,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    return 'Time: ' + tooltipItems[0].label + 's';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Time (seconds)'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Voltage (V)'
+                            },
+                            min: function(context) {
+                                // Set the minimum to slightly below the minimum voltage
+                                const min = Math.min(...data.voltagePoints);
+                                return Math.floor(min * 10) / 10; // Round down to 1 decimal place
+                            },
+                            suggestedMax: function(context) {
+                                // Set the maximum to slightly above the nominal voltage
+                                return parseFloat(document.getElementById('battery-voltage').value) + 0.1;
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Current (mA)'
+                            },
+                            grid: {
+                                drawOnChartArea: false // only show grid for the first y-axis
+                            },
+                            min: 0, // Current cannot be negative
+                            suggestedMax: Math.max(...data.currentPoints) * 1.1 // 10% above max current
+                        }
+                    }
+                }
+            });
+            
+            // Update the voltage legend
+            updateVoltageLegend();
+        }
+        
+        // Update the voltage legend
+        function updateVoltageLegend() {
+            const legendElement = document.getElementById('voltage-legend');
+            legendElement.innerHTML = '';
+            
+            // Use V and mA for the legend
+            const legendItems = [
+                { label: 'Battery Voltage (V)', color: '#9b59b6' },  // Changed to purple to match line color
+                { label: 'MCU Current (mA)', color: '#3498db' },
+                { label: 'GPS Current (mA)', color: '#e74c3c' },
+                { label: 'SHT31 Current (mA)', color: '#2ecc71' },
+                { label: 'LoRa Current (mA)', color: '#f39c12' }
+            ];
+            
+            legendItems.forEach(item => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item';
+                
+                const colorBox = document.createElement('div');
+                colorBox.className = 'legend-color';
+                colorBox.style.backgroundColor = item.color;
+                
+                const label = document.createElement('span');
+                label.textContent = item.label;
+                
+                legendItem.appendChild(colorBox);
+                legendItem.appendChild(label);
+                
+                legendElement.appendChild(legendItem);
+            });
+        }
+        
+        // Event listener for the calculate button
+        document.getElementById('calculate-button').addEventListener('click', calculatePowerBudget);
+        
+        // Initialize the charts and weight budget when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            calculatePowerBudget();
+            updateWeightBudget();
+        });
+    </script>
+</body>
+</html>
