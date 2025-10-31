@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LoRaWAN Regions & H3 Visualization - Cesium</title>
+    
+    <!-- Cesium CSS -->
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    
+    <!-- H3-js library -->
+    <script src="https://unpkg.com/h3-js@4.1.0/dist/h3-js.umd.js"></script>
+    
+    <!-- Cesium JS -->
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.111/Build/Cesium/Cesium.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+        
+        #cesiumContainer {
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(42, 42, 42, 0.95);
+            padding: 15px;
+            border-radius: 8px;
+            color: white;
+            max-width: 350px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        #controls h3 {
+            margin: 0 0 15px 0;
+            color: #4fc3f7;
+            font-size: 18px;
+            border-bottom: 2px solid #4fc3f7;
+            padding-bottom: 8px;
+        }
+        
+        #controls h4 {
+            margin: 15px 0 10px 0;
+            color: #81c784;
+            font-size: 14px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        .control-group label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            font-size: 13px;
+        }
+        
+        .control-group label:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .control-group input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .control-group select,
+        .control-group input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .control-group select option {
+            background: #2a2a2a;
+            color: white;
+        }
+        
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .region-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .region-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        .color-box {
+            width: 14px;
+            height: 14px;
+            border-radius: 2px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        #status {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            font-size: 12px;
+            color: #81c784;
+        }
+        
+        .info-text {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div id="cesiumContainer"></div>
+    
+    <div id="controls">
+        <h3>🌍 LoRaWAN Regions & H3 Viewer</h3>
+        
+        <div class="control-group">
+            <label>
+                <input type="checkbox" id="showRegions" checked>
+                Show Region Boundaries
+            </label>
+        </div>
+        
+        <div class="control-group">
+            <label>
+                <input type="checkbox" id="showH3">
+                Show H3 Hexagons
+            </label>
+        </div>
+        
+        <h4>H3 Resolution</h4>
+        <div class="control-group">
+            <input type="number" id="h3Resolution" min="0" max="6" value="3" disabled>
+            <p class="info-text">Resolution 3 ≈ 100km hexagons (firmware default)</p>
+        </div>
+        
+        <h4>Region Selection</h4>
+        <div class="control-group">
+            <select id="regionSelect" multiple size="5">
+                <option value="US915" selected>US915 - United States</option>
+                <option value="EU868" selected>EU868 - Europe</option>
+                <option value="AU915" selected>AU915 - Australia</option>
+                <option value="AS923-1" selected>AS923-1 - Asia Pacific</option>
+                <option value="AS923-2" selected>AS923-2</option>
+                <option value="AS923-3" selected>AS923-3</option>
+                <option value="AS923-4" selected>AS923-4</option>
+                <option value="KR920" selected>KR920 - South Korea</option>
+                <option value="IN865" selected>IN865 - India</option>
+                <option value="CN470" selected>CN470 - China</option>
+                <option value="RU864" selected>RU864 - Russia</option>
+            </select>
+            <p class="info-text">Hold Ctrl/Cmd to select multiple regions</p>
+        </div>
+        
+        <button id="loadButton">Load Selected Regions</button>
+        <button id="generateH3Button" disabled>Generate H3 Cells</button>
+        
+        <h4>Legend</h4>
+        <div id="legend" class="region-legend"></div>
+        
+        <div id="status">Ready to load regions</div>
+    </div>
+
+    <script>
+        // Initialize Cesium viewer
+        // Using the default Cesium Ion token (get your own at https://ion.cesium.com/ for production use)
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkZDkxYWI1OS03ZTE3LTQ2MWYtOWYzZC0wOTFjNTVjNDk1YjkiLCJpZCI6MzU1Mzc0LCJpYXQiOjE3NjE3OTU1Mzl9.vNxpbZp0jbg4zORX7jl1yblDObO8N35pRO5wbOY3BPM';
+
+        const viewer = new Cesium.Viewer('cesiumContainer', {
+            animation: false,
+            timeline: false,
+            fullscreenButton: true,
+            vrButton: false
+        });
+        
+        // Make sure the globe is visible
+        viewer.scene.globe.show = true;
+        viewer.scene.skyBox.show = true;
+
+        // Region color palette
+        const regionColors = {
+            'US915': Cesium.Color.fromCssColorString('#FF6B6B'),
+            'EU868': Cesium.Color.fromCssColorString('#4ECDC4'),
+            'AU915': Cesium.Color.fromCssColorString('#FFD93D'),
+            'AS923-1': Cesium.Color.fromCssColorString('#95E1D3'),
+            'AS923-2': Cesium.Color.fromCssColorString('#A8E6CF'),
+            'AS923-3': Cesium.Color.fromCssColorString('#C7CEEA'),
+            'AS923-4': Cesium.Color.fromCssColorString('#FFDAC1'),
+            'KR920': Cesium.Color.fromCssColorString('#FF8C94'),
+            'IN865': Cesium.Color.fromCssColorString('#B4A7D6'),
+            'CN470': Cesium.Color.fromCssColorString('#F9ED69'),
+            'RU864': Cesium.Color.fromCssColorString('#A8DADC'),
+            'EU433': Cesium.Color.fromCssColorString('#E9C46A'),
+            'CD900-1A': Cesium.Color.fromCssColorString('#F4A261')
+        };
+
+        // Store data sources
+        const regionDataSources = {};
+        const h3DataSources = {};
+        let loadedRegions = [];
+
+        // Update legend
+        function updateLegend() {
+            const legend = document.getElementById('legend');
+            legend.innerHTML = '';
+            
+            // Convert regionColors to simple CSS strings for legend
+            const cssColors = {
+                'US915': '#FF6B6B',
+                'EU868': '#4ECDC4',
+                'AU915': '#FFD93D',
+                'AS923-1': '#95E1D3',
+                'AS923-2': '#A8E6CF',
+                'AS923-3': '#C7CEEA',
+                'AS923-4': '#FFDAC1',
+                'KR920': '#FF8C94',
+                'IN865': '#B4A7D6',
+                'CN470': '#F9ED69',
+                'RU864': '#A8DADC',
+                'EU433': '#E9C46A',
+                'CD900-1A': '#F4A261'
+            };
+            
+            loadedRegions.forEach(region => {
+                const item = document.createElement('div');
+                item.className = 'region-item';
+                
+                const colorBox = document.createElement('div');
+                colorBox.className = 'color-box';
+                colorBox.style.backgroundColor = cssColors[region];
+                
+                const label = document.createElement('span');
+                label.textContent = region;
+                
+                item.appendChild(colorBox);
+                item.appendChild(label);
+                legend.appendChild(item);
+            });
+        }
+
+        // Load GeoJSON for a region
+        async function loadRegion(regionName) {
+            try {
+                const dataSource = await Cesium.GeoJsonDataSource.load(
+                    `https://raw.githubusercontent.com/dewi-alliance/hplans/main/${regionName}.geojson`,
+                    {
+                        stroke: regionColors[regionName],
+                        fill: regionColors[regionName].withAlpha(0.15),
+                        strokeWidth: 2,
+                        clampToGround: true
+                    }
+                );
+                
+                dataSource.name = regionName;
+                regionDataSources[regionName] = dataSource;
+                viewer.dataSources.add(dataSource);
+                
+                return dataSource;
+            } catch (error) {
+                console.error(`Error loading ${regionName}:`, error);
+                throw error;
+            }
+        }
+
+        // Convert GeoJSON polygon to H3 cells
+        function polygonToH3Cells(coordinates, resolution) {
+            const h3Cells = new Set();
+            
+            // Handle both Polygon and MultiPolygon
+            function processPolygon(coords) {
+                try {
+                    // coords[0] is the exterior ring
+                    const exterior = coords[0];
+                    
+                    // Convert to h3-js format [lat, lng]
+                    const h3Polygon = exterior.map(coord => [coord[1], coord[0]]);
+                    
+                    // Use h3-js to get cells
+                    const cells = h3.polygonToCells(h3Polygon, resolution);
+                    cells.forEach(cell => h3Cells.add(cell));
+                } catch (error) {
+                    console.warn('Error processing polygon:', error);
+                }
+            }
+            
+            if (coordinates[0] && Array.isArray(coordinates[0][0])) {
+                if (Array.isArray(coordinates[0][0][0])) {
+                    // MultiPolygon
+                    coordinates.forEach(polygon => processPolygon(polygon));
+                } else {
+                    // Polygon
+                    processPolygon(coordinates);
+                }
+            }
+            
+            return Array.from(h3Cells);
+        }
+
+        // Generate H3 hexagons for loaded regions
+        function generateH3Hexagons() {
+            const resolution = parseInt(document.getElementById('h3Resolution').value);
+            const statusDiv = document.getElementById('status');
+            
+            statusDiv.textContent = `Generating H3 cells at resolution ${resolution}...`;
+            
+            // Check if h3 library is loaded
+            if (typeof h3 === 'undefined') {
+                statusDiv.textContent = 'Error: H3 library not loaded!';
+                console.error('H3 library is not loaded');
+                return;
+            }
+            
+            console.log('Starting H3 generation at resolution', resolution);
+            console.log('Loaded regions:', loadedRegions);
+            
+            // Clear existing H3 data
+            Object.values(h3DataSources).forEach(ds => {
+                viewer.dataSources.remove(ds);
+            });
+            
+            let totalCells = 0;
+            
+            loadedRegions.forEach(regionName => {
+                const regionDS = regionDataSources[regionName];
+                if (!regionDS) return;
+                
+                const h3DataSource = new Cesium.CustomDataSource(`H3_${regionName}`);
+                const entities = regionDS.entities.values;
+                
+                entities.forEach(entity => {
+                    if (entity.polygon) {
+                        const positions = entity.polygon.hierarchy.getValue().positions;
+                        const cartographicPositions = positions.map(pos => 
+                            Cesium.Cartographic.fromCartesian(pos)
+                        );
+                        
+                        const coordinates = cartographicPositions.map(pos => [
+                            Cesium.Math.toDegrees(pos.longitude),
+                            Cesium.Math.toDegrees(pos.latitude)
+                        ]);
+                        coordinates.push(coordinates[0]); // Close the polygon
+                        
+                        const h3Cells = polygonToH3Cells([coordinates], resolution);
+                        totalCells += h3Cells.length;
+                        
+                        h3Cells.forEach(cellId => {
+                            const boundary = h3.cellToBoundary(cellId);
+                            const positions = boundary.map(coord => 
+                                Cesium.Cartesian3.fromDegrees(coord[1], coord[0])
+                            );
+                            
+                            h3DataSource.entities.add({
+                                name: `${regionName} - ${cellId}`,
+                                polygon: {
+                                    hierarchy: new Cesium.PolygonHierarchy(positions),
+                                    material: regionColors[regionName].withAlpha(0.3),
+                                    outline: true,
+                                    outlineColor: regionColors[regionName],
+                                    outlineWidth: 1,
+                                    height: 0,
+                                    perPositionHeight: false
+                                },
+                                description: `Region: ${regionName}<br>H3 Cell: ${cellId}<br>Resolution: ${resolution}`
+                            });
+                        });
+                    }
+                });
+                
+                h3DataSources[regionName] = h3DataSource;
+                viewer.dataSources.add(h3DataSource);
+                h3DataSource.show = document.getElementById('showH3').checked;
+            });
+            
+            statusDiv.textContent = `Generated ${totalCells} H3 cells at resolution ${resolution}`;
+        }
+
+        // Event listeners
+        document.getElementById('loadButton').addEventListener('click', async () => {
+            const select = document.getElementById('regionSelect');
+            const selectedOptions = Array.from(select.selectedOptions).map(opt => opt.value);
+            const statusDiv = document.getElementById('status');
+            
+            if (selectedOptions.length === 0) {
+                statusDiv.textContent = 'Please select at least one region';
+                return;
+            }
+            
+            statusDiv.textContent = 'Loading regions...';
+            
+            // Clear existing data
+            Object.values(regionDataSources).forEach(ds => {
+                viewer.dataSources.remove(ds);
+            });
+            Object.values(h3DataSources).forEach(ds => {
+                viewer.dataSources.remove(ds);
+            });
+            
+            loadedRegions = [];
+            
+            // Load selected regions
+            for (const region of selectedOptions) {
+                try {
+                    await loadRegion(region);
+                    loadedRegions.push(region);
+                    statusDiv.textContent = `Loaded ${loadedRegions.length}/${selectedOptions.length} regions...`;
+                } catch (error) {
+                    statusDiv.textContent = `Error loading ${region}: ${error.message}`;
+                }
+            }
+            
+            updateLegend();
+            
+            // Fly to view all loaded regions
+            if (loadedRegions.length > 0) {
+                viewer.flyTo(viewer.dataSources);
+                document.getElementById('generateH3Button').disabled = false;
+                statusDiv.textContent = `Loaded ${loadedRegions.length} regions. Ready to generate H3 cells.`;
+            }
+        });
+
+        document.getElementById('generateH3Button').addEventListener('click', () => {
+            generateH3Hexagons();
+        });
+
+        document.getElementById('showRegions').addEventListener('change', (e) => {
+            Object.values(regionDataSources).forEach(ds => {
+                ds.show = e.target.checked;
+            });
+        });
+
+        document.getElementById('showH3').addEventListener('change', (e) => {
+            Object.values(h3DataSources).forEach(ds => {
+                ds.show = e.target.checked;
+            });
+            
+            const resolution = document.getElementById('h3Resolution');
+            resolution.disabled = !e.target.checked;
+        });
+
+        document.getElementById('h3Resolution').addEventListener('change', () => {
+            if (loadedRegions.length > 0 && document.getElementById('showH3').checked) {
+                generateH3Hexagons();
+            }
+        });
+
+        // Set camera to look at Earth from space
+        viewer.camera.flyHome(0);
+    </script>
+</body>
+</html>
