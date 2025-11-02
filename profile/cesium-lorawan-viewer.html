@@ -47,14 +47,52 @@
             z-index: 1000;
             max-height: 90vh;
             overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+        
+        #controls.minimized {
+            max-width: 280px;
+            padding: 10px 15px;
+        }
+        
+        #controls.minimized .controls-content {
+            display: none;
+        }
+        
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        #controls.minimized .controls-header {
+            margin-bottom: 0;
         }
         
         #controls h3 {
-            margin: 0 0 15px 0;
+            margin: 0;
             color: #4fc3f7;
             font-size: 18px;
-            border-bottom: 2px solid #4fc3f7;
-            padding-bottom: 8px;
+            flex-grow: 1;
+        }
+        
+        #toggleButton {
+            background: none;
+            border: none;
+            color: #4fc3f7;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            margin: 0 0 0 10px;
+            width: auto;
+            transition: transform 0.3s ease;
+            line-height: 1;
+        }
+        
+        #toggleButton:hover {
+            transform: scale(1.2);
+            box-shadow: none;
         }
         
         #controls h4 {
@@ -173,8 +211,12 @@
     <div id="cesiumContainer"></div>
     
     <div id="controls">
-        <h3>🌍 LoRaWAN Regions & H3 Viewer</h3>
+        <div class="controls-header">
+            <h3>🌍 LoRaWAN Regions & H3 Viewer</h3>
+            <button id="toggleButton" title="Minimize/Maximize">−</button>
+        </div>
         
+        <div class="controls-content">
         <div class="control-group">
             <label>
                 <input type="checkbox" id="showRegions" checked>
@@ -220,6 +262,7 @@
         <div id="legend" class="region-legend"></div>
         
         <div id="status">Ready to load regions</div>
+        </div>
     </div>
 
     <script>
@@ -501,6 +544,23 @@
         document.getElementById('h3Resolution').addEventListener('change', () => {
             if (loadedRegions.length > 0 && document.getElementById('showH3').checked) {
                 generateH3Hexagons();
+            }
+        });
+
+        // Toggle controls minimize/maximize
+        document.getElementById('toggleButton').addEventListener('click', () => {
+            const controls = document.getElementById('controls');
+            const toggleBtn = document.getElementById('toggleButton');
+            
+            controls.classList.toggle('minimized');
+            
+            // Update button text
+            if (controls.classList.contains('minimized')) {
+                toggleBtn.textContent = '+';
+                toggleBtn.title = 'Maximize';
+            } else {
+                toggleBtn.textContent = '−';
+                toggleBtn.title = 'Minimize';
             }
         });
 
