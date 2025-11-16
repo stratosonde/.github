@@ -1,9 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="images/stratosonde_transparent.png">
-    <source media="(prefers-color-scheme: light)" srcset="images/stratosonde_white.png">
-    <img alt="Stratosonde" src="images/stratosonde_both.png" width="400">
-  </picture>
+  <img alt="Stratosonde" src="images/stratosonde_white.png" width="400">
 </p>
 
 # STRATOSONDE
