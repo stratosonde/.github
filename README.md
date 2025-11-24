@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Stratosonde" src=".github/profile/images/stratosonde_white.png" width="400">
+  <img alt="Stratosonde" src="profile/images/stratosonde_white.png" width="400">
 </p>
 
 # STRATOSONDE
@@ -151,9 +151,6 @@ Comprehensive energy analysis with temperature derating, duty cycle modeling, an
 ### [LoRaWAN Region Viewer](https://stratosonde.github.io/.github/profile/cesium-lorawan-viewer.html)
 Interactive 3D globe showing worldwide LoRaWAN regulatory regions. Visualize the H3 hexagonal grid used for autonomous region detection.
 
-### [Atmospheric Flow Viewer](https://stratosonde.github.io/atmospheric-flow-viewer.html)
-Real-time NOAA GFS wind data visualization at multiple pressure levels. Predict balloon trajectories based on current atmospheric conditions.
-
 ---
 
 ## Technical Foundation
@@ -171,8 +168,6 @@ Real-time NOAA GFS wind data visualization at multiple pressure levels. Predict 
 - Flash-based data logging with wear leveling
 - Adaptive transmission scheduling based on battery state
 - GNSS power optimization with predictive duty cycling
-
-### All designs, code, and documentation are open source (MIT/Apache 2.0)
 
 ---
 
@@ -192,7 +187,7 @@ We contribute back through open-source hardware designs, detailed documentation,
 
 **Historical Note:** The name *Stratosonde* honors Environment Canada's 1986 atmospheric research program, reminding us that impactful science doesn't require massive budgets or institutional backing.
 
-![Project Stratosonde 1986 - Zephyr Magazine](.github/profile/images/zephyr1986.png)
+![Project Stratosonde 1986 - Zephyr Magazine](profile/images/zephyr1986.png)
 
 **Community Resources:**
 - [Picoballoon Group](https://groups.io/g/picoballoon) - Flight coordination & community tracking
@@ -203,18 +198,12 @@ We contribute back through open-source hardware designs, detailed documentation,
 
 ## Repositories
 
-- **[sonde](https://github.com/stratosonde/sonde)** - Core firmware for the radiosonde device
+- **[firmware](https://github.com/stratosonde/firmware)** - Core firmware for the radiosonde device
+- **[ground](https://github.com/stratosonde/ground)** - Ground station software and tracking
+- **[hardware](https://github.com/stratosonde/hardware)** - PCB designs, schematics, and component information
+- **[docs](https://github.com/stratosonde/docs)** - Technical documentation site
 - **[h3lite](https://github.com/stratosonde/h3lite)** - Embedded H3 geospatial indexing for automatic LoRaWAN region detection
-- **[hardware](https://docs.google.com/document/d/1UvLQhTHOeyt-fdj2o6CyQJJvrkRZcYuKuNxAXdWrK4A/edit?usp=sharing)** - PCB designs, schematics, and component information
-- **[docs](https://github.com/stratosonde/docs)** - This documentation site
-
----
-
-## License
-
-- **Hardware**: CERN-OHL-S v2
-- **Firmware**: MIT
-- **Documentation**: CC BY-SA 4.0
+- **[.github](https://github.com/stratosonde/.github)** - Organization profile and landing page
 
 ---
 
