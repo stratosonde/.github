@@ -179,13 +179,12 @@ For decades, ham radio operators pioneered high-altitude balloon tracking and te
 
 Stratosonde extends this proven foundation by adding:
 - Autonomous LoRaWAN region detection via H3 geospatial indexing
-- Validated thermal/power models through structured testing
 - Scientific methodology for reproducible atmospheric measurements
 - Integration with emerging LEO satellite LoRaWAN networks
 
 We contribute back through open-source hardware designs, detailed documentation, and participation in communities like [picoballoon groups.io](https://groups.io/g/picoballoon) and [UKHAS](https://ukhas.org.uk).
 
-**Historical Note:** The name *Stratosonde* honors Environment Canada's 1986 atmospheric research program, reminding us that impactful science doesn't require massive budgets or institutional backing.
+**Historical Note:** The name *Stratosonde* honors Environment Canada's 1986 atmospheric research program. [Read the Zephyr 1986 Environment Canada publication →](images/noel1986f.pdf)
 
 ![Project Stratosonde 1986 - Zephyr Magazine](images/zephyr1986.png)
 
