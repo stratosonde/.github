@@ -30,7 +30,7 @@ Traditional weather radiosondes provide 1-2 hours of atmospheric data before des
 | **Total Weight** | <15 grams |
 | **Target Altitude** | 12-18 km (40,000-60,000 ft) |
 | **Mission Duration** | Multi-day validation → weeks/months goal |
-| **Operating Temp** | -50°C to +60°C |
+| **Operating Temp** | -65°C to +60°C (validated) |
 | **Power Source** | Solar + LTO battery |
 | **Communication** | LoRaWAN (terrestrial + LEO satellite) |
 | **Sensors** | Temperature, Pressure, Humidity, GPS |
@@ -73,7 +73,7 @@ Before collecting meaningful atmospheric data, we must validate:
 
 ### Solar-Powered Stratospheric Operation
 
-Operating at -50°C with minimal solar input presents unique challenges:
+Operating at stratospheric temperatures (-56°C nominal, validated to -65°C) with minimal solar input presents unique challenges:
 - **Energy Harvesting**: BQ25570 boost converter optimized for low-light, cold conditions
 - **Battery Chemistry**: LTO cells maintain capacity at extreme temperatures
 - **Power Management**: Adaptive duty cycling based on battery state and solar availability
@@ -131,7 +131,7 @@ Our atmospheric prediction tools model:
 
 ### Community Resources
 
-- **Discord**: [discord.gg/CdqQqW7n](https://discord.gg/CdqQqW7n) - Real-time discussion
+- **Discord**: [discord.gg/AfTHuy9v24](https://discord.gg/AfTHuy9v24) - Real-time discussion
 - **GitHub**: [@stratosonde](https://github.com/stratosonde) - All code and hardware designs
 - **Documentation**: [docs.stratosonde.org](https://docs.stratosonde.org) - Technical details
 - **Email**: info@stratosonde.org - Direct contact
@@ -157,9 +157,9 @@ Interactive 3D globe showing worldwide LoRaWAN regulatory regions. Visualize the
 
 ### Hardware
 - **MCU**: STM32WLE5JC (Cortex-M4 @ 48MHz, integrated LoRa radio)
-- **GNSS**: Quectel L96 or u-blox MAX-M10S
+- **GNSS**: ATGM336H (low-cost GPS module)
 - **Sensors**: Sensirion SHT31 (temp/humidity), TE MS5607 (pressure/altitude)
-- **Power**: Texas Instruments BQ25570 energy harvester + 2S LTO batteries
+- **Power**: Texas Instruments BQ25570 energy harvester + 2S LTO batteries + 1.5F supercapacitor
 - **Solar**: Custom PCB-integrated panels optimized for low-angle, diffuse light
 
 ### Firmware
