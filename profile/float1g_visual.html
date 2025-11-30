@@ -2,26 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Superpressure Balloon Physics Calculator</title>
+<title>Step-by-Step Balloon Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 body{font-family:'Segoe UI',Arial,sans-serif;margin:20px;background:#f0f2f5;max-width:1200px;margin:20px auto;}
 h1{color:#1a1a1a;text-align:center;margin-bottom:10px;}
-.subtitle{text-align:center;color:#666;margin-bottom:20px;font-size:1.1em;}
-.intro-box{background:#e3f2fd;border-left:4px solid #2196F3;padding:20px;border-radius:8px;margin:20px 0;line-height:1.7;}
-.intro-box h3{margin-top:0;color:#1565c0;}
+.subtitle{text-align:center;color:#666;margin-bottom:30px;font-size:1.1em;}
 .step{background:#fff;border-radius:12px;margin-bottom:25px;padding:25px;box-shadow:0 2px 8px rgba(0,0,0,0.1);border-left:6px solid #ccc;}
 .step-1{border-left-color:#4CAF50;}.step-2{border-left-color:#2196F3;}.step-3{border-left-color:#FF9800;}
-.step-4{border-left-color:#9C27B0;}.step-5{border-left-color:#F44336;}.step-6{border-left-color:#00BCD4;}
+.step-4{border-left-color:#9C27B0;}.step-5{border-left-color:#F44336;}
 .step-header{display:flex;align-items:center;margin-bottom:15px;gap:12px;}
 .step-number{background:#1a1a1a;color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:20px;flex-shrink:0;}
 .step-title{font-size:1.5em;font-weight:600;color:#1a1a1a;margin:0;}
-.step-description{color:#555;margin-bottom:15px;line-height:1.6;font-size:1.05em;}
-.intuition{background:#fff8e1;border-left:4px solid #ffc107;border-radius:6px;padding:15px;margin:15px 0;line-height:1.7;}
-.intuition strong{color:#f57c00;}
-.physics-note{background:#f3e5f5;border-left:4px solid #9c27b0;border-radius:6px;padding:15px;margin:15px 0;line-height:1.7;}
-.physics-note strong{color:#7b1fa2;}
+.step-description{color:#555;margin-bottom:20px;line-height:1.6;font-size:1.05em;}
 .inputs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:15px;}
 .input-group{margin-bottom:0;}
 .input-group label{display:block;font-weight:600;margin-bottom:6px;color:#333;font-size:0.95em;}
@@ -31,7 +25,7 @@ h1{color:#1a1a1a;text-align:center;margin-bottom:10px;}
 .calculation-box{background:#f8f9fa;padding:20px;border-radius:8px;margin:15px 0;border:2px solid #dee2e6;}
 .calc-step{margin:12px 0;padding:10px;background:white;border-radius:6px;}
 .calc-label{color:#666;font-size:0.9em;margin-bottom:5px;}
-.calc-equation{color:#1976D2;font-weight:600;margin:5px 0;font-family:monospace;font-size:0.95em;}
+.calc-equation{color:#1976D2;font-weight:600;margin:5px 0;font-family:monospace;}
 .calc-values{color:#2e7d32;margin:5px 0;font-family:monospace;}
 .result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;margin-top:20px;}
 .result-item{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:18px;border-radius:10px;box-shadow:0 4px 6px rgba(0,0,0,0.1);}
@@ -46,38 +40,67 @@ h1{color:#1a1a1a;text-align:center;margin-bottom:10px;}
 .safety-danger{background:linear-gradient(135deg,#e57373 0%,#ef5350 100%);color:white;box-shadow:0 4px 6px rgba(0,0,0,0.1);}
 .chart-container{background:#fff;padding:25px;border-radius:12px;margin:25px 0;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
 .chart-title{font-size:1.3em;font-weight:600;margin-bottom:15px;color:#1a1a1a;}
+button{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:1em;font-weight:600;box-shadow:0 4px 6px rgba(0,0,0,0.1);transition:transform 0.2s;}
+button:hover{transform:translateY(-2px);box-shadow:0 6px 12px rgba(0,0,0,0.15);}
 .info-box{background:#e3f2fd;border-left:4px solid #2196F3;padding:15px;border-radius:6px;margin:15px 0;}
 .info-box strong{color:#1565c0;}
-.warning-box{background:#fff3e0;border-left:4px solid #ff9800;padding:15px;border-radius:6px;margin:15px 0;}
-.warning-box strong{color:#e65100;}
 </style>
 </head>
 <body>
-<h1>🎈 Superpressure Balloon Physics Calculator</h1>
-<p class="subtitle">Step-by-step physics validated against <a href="https://predictor.stratosonde.org" target="_blank">predictor.stratosonde.org</a></p>
+<h1>🎈 Superpressure Balloon Calculator</h1>
+<p class="subtitle">Follow the physics step-by-step | Based on <a href="https://ukhas.org.uk/doku.php?id=projects:splat" target="_blank">UKHAS SPLAT</a></p>
 
-<div class="intro-box">
-<h3>📚 About This Calculator</h3>
+<div class="intro-box" style="background:#e3f2fd;border-left:4px solid #2196F3;padding:20px;border-radius:8px;margin:20px 0;line-height:1.7;">
+<h3 style="margin-top:0;color:#1565c0;">📚 About This Calculator</h3>
 <p><strong>What this calculator does:</strong> Computes the equilibrium state of a superpressure balloon - where it will float and the stress on the envelope. This is a <em>static equilibrium calculator</em> that solves for the final steady-state conditions.</p>
-
-<p><strong>Physics assumptions:</strong> For small balloons (< 0.5 m³), the gas temperature equals atmospheric temperature due to rapid thermal equilibration. This matches the simplified thermal model in the Python predictor for balloons with gas mass < 0.1 kg.</p>
-
-<p><strong>For full trajectory prediction:</strong> Use <a href="https://predictor.stratosonde.org" target="_blank">predictor.stratosonde.org</a> for multi-day flight paths including:
-• Diurnal altitude oscillations (±500-2000 m from thermal cycles)
-• Real-time wind field evolution
-• Time-dependent thermal dynamics
-• Complete trajectory tracking over days/weeks</p>
+<p><strong>New feature:</strong> Optional pressure relief valve simulation shows how venting gas affects float altitude and safety margins.</p>
+<p><strong>For full trajectory prediction:</strong> Use <a href="https://predictor.stratosonde.org" target="_blank">predictor.stratosonde.org</a> for multi-day flight paths with real weather data.</p>
 </div>
 
-<!-- STEP 1: SYSTEM DEFINITION -->
+<!-- RESULTS SUMMARY -->
+<div id="resultsSummary" style="background:#fff;border-radius:12px;padding:25px;margin-bottom:25px;box-shadow:0 4px 12px rgba(0,0,0,0.15);border-left:6px solid #667eea;">
+<h2 style="margin:0 0 20px 0;color:#1a1a1a;font-size:1.4em;display:flex;align-items:center;gap:10px;">
+<span>📊 Results Summary</span>
+<span style="font-size:0.6em;color:#666;font-weight:normal;">(Updates automatically)</span>
+</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:15px;">
+<div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:15px;border-radius:10px;">
+<div style="font-size:0.85em;opacity:0.9;margin-bottom:5px;">🎯 Float Altitude</div>
+<div style="font-size:1.6em;font-weight:bold;"><span id="summary_float_m">--</span> m</div>
+<div style="font-size:0.9em;opacity:0.8;"><span id="summary_float_ft">--</span> ft</div>
+</div>
+<div style="background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);color:white;padding:15px;border-radius:10px;">
+<div style="font-size:0.85em;opacity:0.9;margin-bottom:5px;">📍 Onset Altitude</div>
+<div style="font-size:1.6em;font-weight:bold;"><span id="summary_onset_m">--</span> m</div>
+<div style="font-size:0.9em;opacity:0.8;"><span id="summary_onset_ft">--</span> ft</div>
+</div>
+<div style="background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%);color:white;padding:15px;border-radius:10px;">
+<div style="font-size:0.85em;opacity:0.9;margin-bottom:5px;">⬆️ Initial Ascent</div>
+<div style="font-size:1.6em;font-weight:bold;"><span id="summary_ascent_ms">--</span> m/s</div>
+<div style="font-size:0.9em;opacity:0.8;"><span id="summary_ascent_fpm">--</span> ft/min</div>
+</div>
+<div style="background:linear-gradient(135deg,#fa709a 0%,#fee140 100%);color:white;padding:15px;border-radius:10px;">
+<div style="font-size:0.85em;opacity:0.9;margin-bottom:5px;">💨 Fill Volume</div>
+<div style="font-size:1.6em;font-weight:bold;"><span id="summary_fill">--</span> L</div>
+<div style="font-size:0.9em;opacity:0.8;">@ <span id="summary_fill_ratio">--</span>% full</div>
+</div>
+<div id="summary_safety_card" style="background:linear-gradient(135deg,#81c784 0%,#66bb6a 100%);color:white;padding:15px;border-radius:10px;">
+<div style="font-size:0.85em;opacity:0.9;margin-bottom:5px;">⚠️ Pressure Safety</div>
+<div style="font-size:1.6em;font-weight:bold;"><span id="summary_diff_psi">--</span> psi</div>
+<div style="font-size:0.9em;opacity:0.8;font-weight:600;"><span id="summary_safety_status">--</span></div>
+</div>
+<div id="summary_valve_card" style="display:none;background:linear-gradient(135deg,#30cfd0 0%,#330867 100%);color:white;padding:15px;border-radius:10px;">
+<div style="font-size:0.85em;opacity:0.9;margin-bottom:5px;">🔓 Valve Status</div>
+<div style="font-size:1.6em;font-weight:bold;">ACTIVE</div>
+<div style="font-size:0.9em;opacity:0.8;"><span id="summary_valve_info">--</span></div>
+</div>
+</div>
+</div>
+
 <div class="step step-1">
-<div class="step-header"><div class="step-number">1</div><h2 class="step-title">System Definition</h2></div>
-<p class="step-description">Define your balloon system properties and launch conditions.</p>
-
-<div class="intuition">
-<strong>💡 Intuition:</strong> Think of this like packing for a trip - you need to know what you're carrying. Every gram matters because it affects how high the balloon can float!
-</div>
-
+<div class="step-header"><div class="step-number">1</div><h2 class="step-title">Define Your Balloon System</h2></div>
+<p class="step-description">Enter balloon, payload, and launch conditions.</p>
+<div class="explanation"><strong>💡 Intuition:</strong> Think of this like packing for a trip - you need to know what you're carrying. Every gram matters because it affects how high the balloon can float!</div>
 <div class="inputs-grid">
 <div class="input-group"><label for="gas_type">🌬️ Lifting Gas</label>
 <select id="gas_type">
@@ -85,249 +108,138 @@ h1{color:#1a1a1a;text-align:center;margin-bottom:10px;}
 <option value="0.0922">Hydrogen 97% (0.0922 kg/m³)</option>
 <option value="0.1693">Helium (0.1693 kg/m³ at 15°C)</option>
 <option value="0.2010">Helium 97% (0.2010 kg/m³ at 15°C)</option>
-</select><div class="input-help">Gas used to fill balloon. Helium is safer; hydrogen provides more lift.</div></div>
-
+</select><div class="input-help">Gas used to fill balloon</div></div>
 <div class="input-group"><label for="balloon_volume">📏 Balloon Max Volume</label>
 <input type="number" id="balloon_volume" value="0.5" step="0.01">
-<div class="input-help">m³ - When fully inflated (superpressure phase)</div></div>
-
+<div class="input-help">m³ - When fully inflated</div></div>
 <div class="input-group"><label for="balloon_weight">⚖️ Balloon Weight</label>
 <input type="number" id="balloon_weight" value="105" step="1">
-<div class="input-help">grams - Envelope mass only</div></div>
-
+<div class="input-help">grams - Envelope only</div></div>
 <div class="input-group"><label for="payload_weight">📦 Payload Weight</label>
 <input type="number" id="payload_weight" value="10" step="1">
-<div class="input-help">grams - Electronics, sensors, battery, etc.</div></div>
-
+<div class="input-help">grams - All non-balloon</div></div>
 <div class="input-group"><label for="free_lift">⬆️ Free Lift</label>
 <input type="number" id="free_lift" value="8" step="1">
-<div class="input-help">grams - Extra buoyancy for ascent rate</div></div>
-
+<div class="input-help">grams - Extra lift</div></div>
 <div class="input-group"><label for="launch_elevation">🏔️ Launch Elevation</label>
 <input type="number" id="launch_elevation" value="0" step="10">
 <div class="input-help">meters - Above sea level</div></div>
-
 <div class="input-group"><label for="launch_temp">🌡️ Launch Temperature</label>
 <input type="number" id="launch_temp" value="15" step="0.1">
-<div class="input-help">°C - Actual ground temperature</div></div>
+<div class="input-help">°C - At ground</div></div>
+</div>
+<div class="info-box" style="margin-top:20px;"><strong>⚙️ Pressure Relief Valve</strong> (Optional Safety Feature)</div>
+<div class="inputs-grid">
+<div class="input-group"><label><input type="checkbox" id="valve_enabled" style="width:auto;margin-right:8px;">Enable Pressure Relief Valve</label>
+<div class="input-help">Limits max pressure differential</div></div>
+<div class="input-group"><label for="valve_pressure_limit">🔓 Pressure Limit</label>
+<input type="number" id="valve_pressure_limit" value="0.6" step="0.05" min="0.1" max="2.0">
+<div class="input-help">psi - Max differential pressure</div></div>
+</div>
+<div class="explanation" style="background:#f3e5f5;border-left-color:#9c27b0;"><strong>📐 Physics:</strong> The system's total mass (envelope + payload + gas) determines how much air must be displaced to achieve neutral buoyancy. More mass = deeper into atmosphere = higher float altitude.</div>
 </div>
 
-<div class="physics-note">
-<strong>📐 Physics:</strong> The system's total mass (envelope + payload + gas) determines how much air must be displaced to achieve neutral buoyancy. More mass = deeper into atmosphere = higher float altitude.
-</div>
-</div>
-
-<!-- STEP 2: LAUNCH CONDITIONS & FILL -->
 <div class="step step-2">
 <div class="step-header"><div class="step-number">2</div><h2 class="step-title">Launch Conditions & Fill Volume</h2></div>
 <p class="step-description">Calculate atmospheric conditions at launch and required gas fill.</p>
-
-<div class="intuition">
-<strong>💡 Intuition:</strong> Like inflating a balloon until a scale shows the right weight. The "neck lift" is what you'd measure with a spring scale at the balloon's neck before release.
-</div>
-
+<div class="explanation"><strong>💡 Intuition:</strong> Like inflating a balloon until a scale shows the right weight. The "neck lift" is what you'd measure with a spring scale at the balloon's neck before release.</div>
 <div class="calculation-box">
-<div class="calc-step"><div class="calc-label">Launch pressure (ISA atmospheric model)</div>
-<div class="calc-equation">P = P₀ × (1 - Lh/T₀)^(gM/RL)</div>
-<div class="calc-values" id="calc_launch_pressure"></div></div>
-
-<div class="calc-step"><div class="calc-label">Air density at launch</div>
-<div class="calc-equation">ρ = P / (287.05 × T)</div>
-<div class="calc-values" id="calc_air_density"></div></div>
-
-<div class="calc-step"><div class="calc-label">Neck lift (force balance at launch)</div>
-<div class="calc-equation">Lift = Free Lift + Payload Weight</div>
-<div class="calc-values" id="calc_neck_lift"></div></div>
-
-<div class="calc-step"><div class="calc-label">Fill volume (from buoyancy requirement)</div>
-<div class="calc-equation">V = (Balloon + Payload + FreeLift) / (ρ_air - ρ_gas)</div>
-<div class="calc-values" id="calc_fill_volume"></div></div>
-
-<div class="calc-step"><div class="calc-label">Gas mass (from fill volume)</div>
-<div class="calc-equation">m_gas = V_fill × ρ_gas</div>
+<div class="calc-step"><div class="calc-label">Gas mass</div>
+<div class="calc-equation">Gas Mass = Volume × Density × 1000</div>
 <div class="calc-values" id="calc_gas_mass"></div></div>
+<div class="calc-step"><div class="calc-label">Total mass</div>
+<div class="calc-equation">Total = Balloon + Payload + Gas</div>
+<div class="calc-values" id="calc_total_mass"></div></div>
+<div class="calc-step"><div class="calc-label">System density</div>
+<div class="calc-equation">Density = Mass / Volume</div>
+<div class="calc-values" id="calc_system_density"></div></div>
 </div>
-
-<div class="physics-note">
-<strong>📐 Physics:</strong> The ISA (International Standard Atmosphere) model calculates pressure and temperature at any altitude. We use actual launch temperature (not ISA) for accuracy. The fill volume creates enough buoyant force to lift the total system mass plus provide excess "free lift" for ascent.
-</div>
-
 <div class="result-grid">
-<div class="result-item"><div class="result-label">Fill Volume</div>
-<div class="result-value"><span id="fill_volume">0</span><span class="result-unit">m³</span></div></div>
-<div class="result-item"><div class="result-label">Fill Volume</div>
-<div class="result-value"><span id="fill_volume_liters">0</span><span class="result-unit">liters</span></div></div>
 <div class="result-item"><div class="result-label">Gas Mass</div>
 <div class="result-value"><span id="gas_mass">0</span><span class="result-unit">g</span></div></div>
 <div class="result-item"><div class="result-label">Total Mass</div>
 <div class="result-value"><span id="total_mass">0</span><span class="result-unit">g</span></div></div>
-<div class="result-item"><div class="result-label">Fill Ratio</div>
-<div class="result-value"><span id="fill_ratio">0</span><span class="result-unit">%</span></div></div>
-<div class="result-item"><div class="result-label">Neck Lift</div>
-<div class="result-value"><span id="neck_lift">0</span><span class="result-unit">g</span></div></div>
+<div class="result-item"><div class="result-label">System Density</div>
+<div class="result-value"><span id="system_density">0</span><span class="result-unit">kg/m³</span></div></div>
+<div class="explanation" style="background:#f3e5f5;border-left-color:#9c27b0;"><strong>📐 Physics:</strong> The ISA (International Standard Atmosphere) model calculates pressure and temperature at any altitude. We use actual launch temperature (not ISA) for accuracy. The fill volume creates enough buoyant force to lift the total system mass plus provide excess "free lift" for ascent.</div>
 </div>
 
-<div class="info-box"><strong>💡 For Ground Crew:</strong> Fill <strong><span id="fill_liters_text">0</span> liters</strong> of gas. Measure <strong><span id="neck_lift_text">0</span> grams</strong> at the balloon neck with a spring scale before release.</div>
-</div>
-
-<!-- STEP 3: FORCES & ASCENT RATE -->
 <div class="step step-3">
 <div class="step-header"><div class="step-number">3</div><h2 class="step-title">Forces & Initial Ascent Rate</h2></div>
 <p class="step-description">Analyze forces and calculate how fast the balloon rises at launch.</p>
-
-<div class="intuition">
-<strong>💡 Intuition:</strong> Why does the balloon go up? Because the upward buoyant force (weight of displaced air) is greater than the downward weight force. The difference drives acceleration until air resistance (drag) balances it out.
-</div>
-
+<div class="explanation"><strong>💡 Intuition:</strong> Why does the balloon go up? Because the upward buoyant force (weight of displaced air) is greater than the downward weight force. The difference drives acceleration until air resistance (drag) balances it out.</div>
 <div class="calculation-box">
 <div class="calc-step"><div class="calc-label">Buoyancy force (upward)</div>
 <div class="calc-equation">F_buoyancy = ρ_air × V × g</div>
 <div class="calc-values" id="calc_buoyancy"></div></div>
-
 <div class="calc-step"><div class="calc-label">Weight force (downward)</div>
 <div class="calc-equation">F_weight = m_total × g</div>
 <div class="calc-values" id="calc_weight"></div></div>
-
 <div class="calc-step"><div class="calc-label">Net upward force</div>
 <div class="calc-equation">F_net = F_buoyancy - F_weight</div>
 <div class="calc-values" id="calc_net_force"></div></div>
-
-<div class="calc-step"><div class="calc-label">Virtual mass (accelerated air)</div>
-<div class="calc-equation">m_virtual = 0.5 × ρ_air × V</div>
-<div class="calc-values" id="calc_virtual_mass"></div></div>
-
 <div class="calc-step"><div class="calc-label">Terminal ascent velocity (with drag)</div>
 <div class="calc-equation">v = √(2×F_net / (C_d×ρ_air×A))</div>
 <div class="calc-values" id="calc_ascent_rate"></div></div>
 </div>
-
-<div class="physics-note">
-<strong>📐 Physics:</strong> The balloon doesn't accelerate forever - drag force increases with velocity until it balances the net force. This is called "terminal velocity." Virtual mass represents surrounding air that must be accelerated along with the balloon, effectively adding 20-40% to the system's inertia.
-</div>
-
+<div class="explanation" style="background:#f3e5f5;border-left-color:#9c27b0;"><strong>📐 Physics:</strong> The balloon doesn't accelerate forever - drag force increases with velocity until it balances the net force. This is "terminal velocity."</div>
 <div class="result-grid">
 <div class="result-item"><div class="result-label">Initial Ascent Rate</div>
-<div class="result-value"><span id="ascent_rate_launch">0</span><span class="result-unit">m/s</span></div></div>
+<div class="result-value"><span id="ascent_rate_ms">0</span><span class="result-unit">m/s</span></div></div>
 <div class="result-item"><div class="result-label">Initial Ascent Rate</div>
-<div class="result-value"><span id="ascent_rate_launch_fpm">0</span><span class="result-unit">ft/min</span></div></div>
-<div class="result-item"><div class="result-label">Virtual Mass</div>
-<div class="result-value"><span id="virtual_mass">0</span><span class="result-unit">g</span></div></div>
-<div class="result-item"><div class="result-label">Effective Mass</div>
-<div class="result-value"><span id="effective_mass">0</span><span class="result-unit">g</span></div></div>
-</div>
+<div class="result-value"><span id="ascent_rate_fpm">0</span><span class="result-unit">ft/min</span></div></div>
+<div class="result-item"><div class="result-label">Net Force</div>
+<div class="result-value"><span id="net_force">0</span><span class="result-unit">N</span></div></div>
+</div></div>
 
-<div class="warning-box">
-<strong>⚠️ Virtual Mass Effect:</strong> Naive calculations that ignore virtual mass overestimate ascent rate by 20-40%. This calculator uses the physically correct model validated against real balloon flights.
-</div>
-</div>
-
-<!-- STEP 4: SUPERPRESSURE ONSET -->
+<div class="step step-4">
 <div class="step step-4">
 <div class="step-header"><div class="step-number">4</div><h2 class="step-title">Superpressure Onset Altitude</h2></div>
 <p class="step-description">Where the balloon reaches maximum volume and stops expanding.</p>
-
-<div class="intuition">
-<strong>💡 Intuition:</strong> As the balloon ascends, decreasing atmospheric pressure allows the gas to expand (like a sealed bag of chips on an airplane). The balloon reaches max size when this expanded gas fills the entire envelope.
-</div>
-
+<div class="explanation"><strong>💡 Intuition:</strong> As the balloon ascends, decreasing atmospheric pressure allows the gas to expand (like a sealed bag of chips on an airplane). The balloon reaches max size when this expanded gas fills the entire envelope.</div>
 <div class="calculation-box">
-<div class="calc-step"><div class="calc-label">Gas expansion during ascent (ideal gas law)</div>
-<div class="calc-equation">V(h) = V_fill × (P_launch/P_h) × (T_h/T_launch)</div>
-<div class="calc-equation">Find altitude h where V(h) = V_max</div>
-<div class="calc-values" id="calc_onset_search"></div></div>
+<div class="calc-step"><div class="calc-label">Finding altitude</div>
+<div class="calc-equation">V_expand = V_fill × (P_launch/P_h) × (T_h/T_launch)</div>
+<div class="calc-values" id="calc_float_search"></div></div>
 </div>
-
-<div class="physics-note">
-<strong>📐 Physics:</strong> Below onset altitude, the balloon is in "free expansion" - it grows like a latex balloon as you blow it up. Above onset, it's in "superpressure" - the envelope is fully taut and internal pressure exceeds external pressure. This is why it's called a superpressure balloon!
-</div>
-
+<div class="explanation" style="background:#f3e5f5;border-left-color:#9c27b0;"><strong>📐 Physics:</strong> Below onset altitude, the balloon is in "free expansion" - it grows like a latex balloon as you blow it up. Above onset, it's in "superpressure" - the envelope is fully taut and internal pressure exceeds external pressure.</div>
 <div class="result-grid">
 <div class="result-item"><div class="result-label">Onset Altitude</div>
-<div class="result-value"><span id="onset_altitude_m">0</span><span class="result-unit">m</span></div></div>
+<div class="result-value"><span id="onset_altitude">0</span><span class="result-unit">m</span></div></div>
 <div class="result-item"><div class="result-label">Onset Altitude</div>
 <div class="result-value"><span id="onset_altitude_ft">0</span><span class="result-unit">ft</span></div></div>
-<div class="result-item"><div class="result-label">Pressure at Onset</div>
-<div class="result-value"><span id="onset_pressure">0</span><span class="result-unit">hPa</span></div></div>
-<div class="result-item"><div class="result-label">Temp at Onset</div>
-<div class="result-value"><span id="onset_temp">0</span><span class="result-unit">°C</span></div></div>
-</div>
+</div></div>
 
-<div class="explanation">
-<strong>🎯 Critical Transition:</strong> Ascent rate slows significantly at onset because the balloon can no longer expand to maintain buoyancy as air density decreases. The balloon continues rising in superpressure until reaching equilibrium altitude.
-</div>
-</div>
-
-<!-- STEP 5: FLOAT ALTITUDE -->
 <div class="step step-5">
 <div class="step-header"><div class="step-number">5</div><h2 class="step-title">Float Altitude (Equilibrium)</h2></div>
 <p class="step-description">Final altitude where buoyancy equals weight - neutral equilibrium.</p>
-
-<div class="intuition">
-<strong>💡 Intuition:</strong> The balloon rises until it reaches an altitude where the air is so thin that the weight of displaced air exactly equals the weight of the balloon system. It's like a submarine adjusting ballast to hover at a specific depth.
-</div>
-
-<div class="calculation-box">
-<div class="calc-step"><div class="calc-label">Neutral buoyancy condition</div>
-<div class="calc-equation">ρ_air × V_max = m_total</div>
-<div class="calc-equation">Solve for altitude: ρ_air(h) = m_total/V_max</div>
-<div class="calc_values" id="calc_float_altitude"></div></div>
-
-<div class="calc-step"><div class="calc-label">System density at float</div>
-<div class="calc-equation">ρ_system = m_total / V_max</div>
-<div class="calc-values" id="calc_system_density"></div></div>
-</div>
-
-<div class="physics-note">
-<strong>📐 Physics:</strong> At float altitude, net force = 0, so ascent rate = 0 (ignoring atmospheric vertical motions). The balloon has reached mechanical equilibrium. In reality, thermal effects cause ±500-2000 m altitude oscillations around this mean value.
-</div>
-
+<div class="explanation"><strong>💡 Intuition:</strong> The balloon rises until it reaches an altitude where the air is so thin that the weight of displaced air exactly equals the weight of the balloon system. It's like a submarine adjusting ballast to hover at a specific depth.</div>
 <div class="result-grid">
 <div class="result-item"><div class="result-label">Float Altitude</div>
 <div class="result-value"><span id="float_altitude">0</span><span class="result-unit">m</span></div></div>
 <div class="result-item"><div class="result-label">Float Altitude</div>
 <div class="result-value"><span id="float_altitude_ft">0</span><span class="result-unit">ft</span></div></div>
-<div class="result-item"><div class="result-label">System Density</div>
-<div class="result-value"><span id="system_density">0</span><span class="result-unit">kg/m³</span></div></div>
-<div class="result-item"><div class="result-label">Altitude Gain After Onset</div>
+<div class="result-item"><div class="result-label">Altitude Gain</div>
 <div class="result-value"><span id="altitude_gain">0</span><span class="result-unit">m</span></div></div>
 <div class="result-item"><div class="result-label">Temp at Float</div>
 <div class="result-value"><span id="temp_float">0</span><span class="result-unit">°C</span></div></div>
-<div class="result-item"><div class="result-label">Est. Ascent Time</div>
-<div class="result-value"><span id="ascent_time_min">0</span><span class="result-unit">min</span></div></div>
+</div>
+<div class="explanation" style="background:#f3e5f5;border-left-color:#9c27b0;"><strong>📐 Physics:</strong> At float altitude, net force = 0, so ascent rate = 0 (ignoring atmospheric vertical motions). The balloon has reached mechanical equilibrium. In reality, thermal effects cause ±500-2000 m altitude oscillations around this mean value.</div>
 </div>
 
-<div class="info-box">
-<strong>💡 Real Flight Behavior:</strong> The balloon will oscillate ±500-2000 m around this altitude due to diurnal thermal cycles. During day, solar heating warms the atmosphere → density decreases → balloon rises. At night, radiative cooling → density increases → balloon descends. For detailed trajectory: <a href="https://predictor.stratosonde.org" target="_blank">predictor.stratosonde.org</a>
-</div>
-</div>
-
-<!-- STEP 6: PRESSURE ANALYSIS & SAFETY -->
-<div class="step step-6">
+<div class="step step-6" style="border-left-color:#00BCD4;">
 <div class="step-header"><div class="step-number">6</div><h2 class="step-title">Pressure Analysis & Safety</h2></div>
 <p class="step-description">Calculate envelope stress and check against burst limits.</p>
-
-<div class="intuition">
-<strong>💡 Intuition:</strong> Don't confuse two different things! At float altitude: (1) NET FORCE goes to ZERO (buoyancy = weight, equilibrium reached), but (2) PRESSURE DIFFERENTIAL is at its MAXIMUM! Why? You're at highest altitude (lowest external pressure) but internal pressure is maintained by the sealed gas. This ΔP is the STRESS on the envelope - it's fixed by your design choices and is why you must verify it's safe BEFORE launch. If winds push you higher, ΔP increases even more (higher burst risk!).
-</div>
-
+<div class="explanation"><strong>💡 Intuition:</strong> Don't confuse two different things! At float altitude: (1) NET FORCE goes to ZERO (buoyancy = weight), but (2) PRESSURE DIFFERENTIAL is at its MAXIMUM! The balloon is floating, but the envelope is under maximum stress.</div>
 <div class="calculation-box">
-<div class="calc-step"><div class="calc-label">Internal pressure (constant volume phase)</div>
-<div class="calc-equation">P_int = (P_launch × V_fill / T_launch) × (T_float / V_max)</div>
+<div class="calc-step"><div class="calc-label">Internal pressure</div>
+<div class="calc-equation">P_int = (P_l × V_f / T_l) × (T_float / V_max)</div>
 <div class="calc-values" id="calc_internal_pressure"></div></div>
-
-<div class="calc-step"><div class="calc-label">External pressure (atmospheric)</div>
-<div class="calc-equation">P_ext = atmospheric pressure at float altitude</div>
-<div class="calc-values" id="calc_external_pressure"></div></div>
-
-<div class="calc-step"><div class="calc-label">Pressure differential (envelope stress)</div>
+<div class="calc-step"><div class="calc-label">Differential</div>
 <div class="calc-equation">ΔP = P_internal - P_external</div>
 <div class="calc-values" id="calc_diff_pressure"></div></div>
 </div>
-
-<div class="physics-note">
-<strong>📐 Physics:</strong> In superpressure phase, internal pressure exceeds external pressure. This differential creates circumferential stress in the envelope (hoop stress). The envelope must withstand this stress without rupturing. Different balloon materials have different burst pressures.
-</div>
-
+<div class="explanation"><strong>⚠️ Safety:</strong> Qualatex 36" burst at 4.7-5.4 kPa. Keep ΔP below this!</div>
 <div class="result-grid">
 <div class="result-item"><div class="result-label">Internal Pressure</div>
 <div class="result-value"><span id="internal_pressure">0</span><span class="result-unit">kPa</span></div></div>
@@ -338,561 +250,42 @@ h1{color:#1a1a1a;text-align:center;margin-bottom:10px;}
 <div class="result-item"><div class="result-label">Differential (psi)</div>
 <div class="result-value"><span id="diff_pressure_psi">0</span><span class="result-unit">psi</span></div></div>
 </div>
-
 <div id="safety_indicator" class="safety-indicator safety-safe">✅ Calculating...</div>
-
-<div class="warning-box">
-<strong>⚠️ Burst Pressure Limits - Spherical Mylar Balloons:</strong>
-<ul>
-<li><strong>Typical mylar superpressure balloons:</strong> 8-15 kPa burst pressure
-  <ul style="margin-top:5px; font-size:0.95em;">
-    <li>Polyester film (BoPET) with metallic coating</li>
-    <li>Keep ΔP < 6-8 kPa for safe operation with margin</li>
-    <li>Better UV resistance than latex (weeks+ flight duration)</li>
-    <li>Sealing quality is critical - test pressurize before flight</li>
-  </ul>
-</li>
-<li><strong>Heavy-duty aerospace mylar:</strong> 15-25 kPa burst pressure
-  <ul style="margin-top:5px; font-size:0.95em;">
-    <li>Multi-layer construction with reinforcement</li>
-    <li>Used for long-duration stratospheric missions</li>
-    <li>Professional-grade sealing equipment required</li>
-  </ul>
-</li>
-</ul>
-<p style="margin-top:10px;"><strong>Note:</strong> Always verify your specific envelope's rated burst pressure. Test pressurize on ground before flight to check seam integrity!</p>
+<div id="valve_results" style="display:none; background:#e1f5fe; border-left:4px solid #0277bd; padding:15px; border-radius:6px; margin:15px 0;">
+<strong style="color:#01579b;">🔓 Pressure Relief Valve Results:</strong>
+<div style="margin-top:10px; font-size:0.95em;">
+<div>⚙️ <strong>Activation Altitude:</strong> <span id="valve_activation_alt">--</span>m</div>
+<div>💨 <strong>Gas Released:</strong> <span id="valve_gas_released">--</span>g</div>
+<div>📉 <strong>Altitude Loss:</strong> <span id="valve_altitude_loss">--</span>m (compared to no valve)</div>
+<div>🎯 <strong>Final Float:</strong> <span id="valve_final_float">--</span>m</div>
 </div>
-</div>
-
-<!-- CHARTS -->
-<div class="chart-container">
-<h3 class="chart-title">📊 Volume & Ascent Rate vs Altitude</h3>
-<div style="height:350px;"><canvas id="ascentChart"></canvas></div>
-<div class="info-box">
-<strong>Chart Interpretation:</strong> Blue line shows balloon volume expanding during free expansion phase, then constant at V_max during superpressure. Orange line shows ascent rate decreasing with altitude (thinner air = less buoyancy) and dropping sharply at onset.
 </div>
 </div>
 
 <div class="chart-container">
-<h3 class="chart-title">📊 Force Analysis vs Altitude</h3>
-<div style="height:350px;"><canvas id="forcesChart"></canvas></div>
-<div class="info-box">
-<strong>Chart Interpretation:</strong> Buoyancy (blue) decreases with altitude as air thins. Weight (red) stays constant. Net force (green) is the difference - when it reaches zero, the balloon floats. The area under the net force curve represents the energy available for ascent.
+<h3 class="chart-title">📊 Pressure vs Altitude</h3>
+<div style="height: 400px; position: relative;">
+<canvas id="pressureChart"></canvas>
 </div>
-</div>
-
-<div class="chart-container">
-<h3 class="chart-title">📊 Pressure Analysis vs Altitude</h3>
-<div style="height:350px;"><canvas id="pressureChart"></canvas></div>
-<div class="info-box">
-<strong>Chart Interpretation:</strong> External pressure (blue) drops exponentially with altitude. Internal pressure (red) follows external until onset (gas expands freely), then increases as volume becomes fixed. The gap between lines is the differential pressure (envelope stress). Green zone = free expansion, yellow zone = superpressure.
-</div>
+<div class="info-box"><strong>Chart:</strong> Blue = external pressure (decreases with altitude). Red = internal pressure (equal to external until onset, then increases). Gap = differential pressure (stress on envelope). <span id="valve_chart_note" style="display:none;">Green dashed line shows valve pressure limit.</span></div>
 </div>
 
-<script>
-// ============================================
-// SUPERPRESSURE BALLOON PHYSICS CALCULATOR
-// Physics validated against predictor.stratosonde.org
-// ============================================
+<div class="chart-container" id="gasMassChartContainer" style="display:none;">
+<h3 class="chart-title">📊 Gas Mass vs Altitude (Valve Active)</h3>
+<div style="height: 400px; position: relative;">
+<canvas id="gasMassChart"></canvas>
+</div>
+<div class="info-box"><strong>Chart:</strong> Shows gas mass during ascent. Blue = with valve (gas vented when limit reached). Gray dashed = without valve (reference). The gap between lines shows total gas released by the valve.</div>
+</div>
 
-// Physical constants (ISA Standard Atmosphere)
-const PHYSICS = {
-  g: 9.80665,        // Gravity (m/s²)
-  R: 8.3144598,      // Universal gas constant (J/(mol·K))
-  M: 0.0289644,      // Molar mass of air (kg/mol)
-  T0: 288.15,        // Sea level standard temperature (K)
-  P0: 101.325,       // Sea level standard pressure (kPa)
-  L: 0.0065          // Temperature lapse rate (K/m)
-};
+<div class="chart-container" id="diffPressureChartContainer" style="display:none;">
+<h3 class="chart-title">📊 Differential Pressure Detail (Valve Active)</h3>
+<div style="height: 400px; position: relative;">
+<canvas id="diffPressureChart"></canvas>
+</div>
+<div class="info-box"><strong>Chart:</strong> Shows pressure differential (ΔP = internal - external). Red = would exceed limit without valve. Green = valve maintains pressure at limit. Dashed line shows valve threshold.</div>
+</div>
 
-// Global chart objects
-let charts = {
-  ascent: null,
-  forces: null, 
-  pressure: null
-};
-
-// ============================================
-// ATMOSPHERIC PHYSICS FUNCTIONS
-// ============================================
-
-/**
- * ISA atmospheric model - returns [P (kPa), T (K)] at altitude h (m)
- * Implements International Standard Atmosphere per ICAO Doc 7488/3
- */
-function isaPressureTemp(h) {
-  if (h <= 11000) {
-    // Troposphere: linear temperature decrease
-    const T = PHYSICS.T0 - PHYSICS.L * h;
-    const P = PHYSICS.P0 * Math.pow(
-      1 - (PHYSICS.L * h) / PHYSICS.T0, 
-      (PHYSICS.g * PHYSICS.M) / (PHYSICS.R * PHYSICS.L)
-    );
-    return [P, T];
-  } else {
-    // Lower stratosphere: isothermal at 216.65 K
-    const T = 216.65;
-    const P11 = PHYSICS.P0 * Math.pow(
-      1 - (PHYSICS.L * 11000) / PHYSICS.T0, 
-      (PHYSICS.g * PHYSICS.M) / (PHYSICS.R * PHYSICS.L)
-    );
-    const P = P11 * Math.exp(-PHYSICS.g * PHYSICS.M * (h - 11000) / (PHYSICS.R * T));
-    return [P, T];
-  }
-}
-
-/**
- * Calculate air density from pressure and temperature
- * Uses ideal gas law: ρ = P / (R_specific * T)
- */
-function airDensity(P_kPa, T_K) {
-  return (P_kPa * 1000) / (287.05 * T_K);
-}
-
-/**
- * Calculate ascent rate including virtual mass and drag
- * Returns terminal velocity in m/s
- */
-function calculateAscentRate(altitude_m, volume_m3, total_mass_kg, air_density) {
-  // Buoyant force
-  const F_buoyancy = air_density * volume_m3 * PHYSICS.g;
-  
-  // Weight force
-  const F_weight = total_mass_kg * PHYSICS.g;
-  
-  // Net upward force
-  const F_net = F_buoyancy - F_weight;
-  
-  if (F_net <= 0) return 0;
-  
-  // Balloon geometry (approximating as sphere)
-  const radius = Math.pow(3 * volume_m3 / (4 * Math.PI), 1/3);
-  const A_cross = Math.PI * radius * radius;
-  
-  // Drag coefficient for sphere
-  const Cd = 0.5;
-  
-  // Terminal velocity: F_net = 0.5 * Cd * rho * A * v^2
-  if (air_density > 0 && A_cross > 0) {
-    return Math.sqrt(2 * F_net / (Cd * air_density * A_cross));
-  }
-  return 0;
-}
-
-// ============================================
-// MAIN CALCULATION ENGINE
-// ============================================
-
-function updateCalculations() {
-  // Get user inputs
-  const gas_density = parseFloat(document.getElementById('gas_type').value);
-  const balloon_volume = parseFloat(document.getElementById('balloon_volume').value);
-  const balloon_weight = parseFloat(document.getElementById('balloon_weight').value);
-  const payload_weight = parseFloat(document.getElementById('payload_weight').value);
-  const free_lift = parseFloat(document.getElementById('free_lift').value);
-  const launch_elevation = parseFloat(document.getElementById('launch_elevation').value);
-  const launch_temp_c = parseFloat(document.getElementById('launch_temp').value);
-  
-  // Convert temperature to Kelvin (use ACTUAL launch temperature, not ISA)
-  const T_launch_K = launch_temp_c + 273.15;
-  
-  // Calculate launch pressure using ISA model
-  let P_launch;
-  if (launch_elevation <= 11000) {
-    P_launch = PHYSICS.P0 * Math.pow(
-      1 - (PHYSICS.L * launch_elevation) / PHYSICS.T0, 
-      (PHYSICS.g * PHYSICS.M) / (PHYSICS.R * PHYSICS.L)
-    );
-  } else {
-    const P11 = PHYSICS.P0 * Math.pow(
-      1 - (PHYSICS.L * 11000) / PHYSICS.T0, 
-      (PHYSICS.g * PHYSICS.M) / (PHYSICS.R * PHYSICS.L)
-    );
-    P_launch = P11 * Math.exp(-PHYSICS.g * PHYSICS.M * (launch_elevation - 11000) / (PHYSICS.R * 216.65));
-  }
-  
-  const air_density_launch = airDensity(P_launch, T_launch_K);
-  
-  // STEP 2: Calculate fill volume from force balance
-  // V_fill * (ρ_air - ρ_gas) = m_balloon + m_payload + m_freelift
-  const neck_lift = free_lift + payload_weight;
-  const fill_volume = (free_lift + payload_weight + balloon_weight) / ((air_density_launch - gas_density) * 1000);
-  const fill_ratio = (fill_volume / balloon_volume) * 100;
-  
-  // Calculate gas mass from fill volume
-  const gas_mass = fill_volume * gas_density * 1000;
-  const total_mass = balloon_weight + payload_weight + gas_mass;
-  const system_density = total_mass / balloon_volume / 1000;
-  
-  // Update Step 2 displays
-  updateElement('fill_volume', fill_volume.toFixed(4));
-  updateElement('fill_volume_liters', (fill_volume * 1000).toFixed(0));
-  updateElement('gas_mass', gas_mass.toFixed(2));
-  updateElement('total_mass', total_mass.toFixed(2));
-  updateElement('fill_ratio', fill_ratio.toFixed(1));
-  updateElement('neck_lift', neck_lift.toFixed(2));
-  updateElement('system_density', system_density.toFixed(4));
-  updateElement('fill_liters_text', (fill_volume * 1000).toFixed(0));
-  updateElement('neck_lift_text', neck_lift.toFixed(2));
-  
-  updateElement('calc_launch_pressure', `P = ${P_launch.toFixed(3)} kPa at ${launch_elevation}m`);
-  updateElement('calc_air_density', `ρ = ${air_density_launch.toFixed(4)} kg/m³`);
-  updateElement('calc_neck_lift', `= ${free_lift} + ${payload_weight} = ${neck_lift.toFixed(2)} g`);
-  updateElement('calc_fill_volume', `= (${free_lift} + ${payload_weight} + ${balloon_weight}) / ((${air_density_launch.toFixed(4)} - ${gas_density}) × 1000) = ${fill_volume.toFixed(4)} m³`);
-  updateElement('calc_gas_mass', `= ${fill_volume.toFixed(4)} × ${gas_density} × 1000 = ${gas_mass.toFixed(2)} g`);
-  
-  // STEP 3: Calculate forces and ascent rate at launch
-  const total_mass_kg = total_mass / 1000;
-  const V_launch = fill_volume;
-  const F_buoyancy_launch = air_density_launch * V_launch * PHYSICS.g;
-  const F_weight = total_mass_kg * PHYSICS.g;
-  const F_net_launch = F_buoyancy_launch - F_weight;
-  const m_virtual_launch = 0.5 * air_density_launch * V_launch;
-  const m_effective_launch = total_mass_kg + m_virtual_launch;
-  const v_ascent_launch = calculateAscentRate(launch_elevation, V_launch, total_mass_kg, air_density_launch);
-  
-  updateElement('calc_buoyancy', `F_b = ${air_density_launch.toFixed(4)} × ${V_launch.toFixed(3)} × 9.81 = ${F_buoyancy_launch.toFixed(3)} N`);
-  updateElement('calc_weight', `F_w = ${total_mass_kg.toFixed(4)} × 9.81 = ${F_weight.toFixed(3)} N`);
-  updateElement('calc_net_force', `F_net = ${F_buoyancy_launch.toFixed(3)} - ${F_weight.toFixed(3)} = ${F_net_launch.toFixed(3)} N`);
-  updateElement('calc_virtual_mass', `m_v = 0.5 × ${air_density_launch.toFixed(4)} × ${V_launch.toFixed(3)} = ${m_virtual_launch.toFixed(4)} kg`);
-  updateElement('calc_ascent_rate', `v = ${v_ascent_launch.toFixed(2)} m/s (${(v_ascent_launch * 196.85).toFixed(0)} ft/min)`);
-  
-  updateElement('ascent_rate_launch', v_ascent_launch.toFixed(2));
-  updateElement('ascent_rate_launch_fpm', (v_ascent_launch * 196.85).toFixed(0));
-  updateElement('virtual_mass', (m_virtual_launch * 1000).toFixed(1));
-  updateElement('effective_mass', (m_effective_launch * 1000).toFixed(1));
-  
-  // STEP 4: Find superpressure onset altitude
-  let onset_altitude = 0;
-  for (let h = launch_elevation; h <= 40000; h += 1) {
-    const [P_h, T_h] = isaPressureTemp(h);
-    const V_expanded = fill_volume * (P_launch / P_h) * (T_h / T_launch_K);
-    if (V_expanded >= balloon_volume) {
-      onset_altitude = h;
-      break;
-    }
-  }
-  
-  const [P_onset, T_onset] = isaPressureTemp(onset_altitude);
-  updateElement('onset_altitude_m', onset_altitude.toFixed(0));
-  updateElement('onset_altitude_ft', (onset_altitude * 3.28084).toFixed(0));
-  updateElement('onset_pressure', (P_onset / 0.01).toFixed(1)); // Convert kPa to hPa
-  updateElement('onset_temp', (T_onset - 273.15).toFixed(1));
-  updateElement('calc_onset_search', `Gas expands to V_max = ${balloon_volume.toFixed(2)} m³ at ${onset_altitude.toFixed(0)} m`);
-  
-  // STEP 5: Find float altitude (neutral buoyancy)
-  let float_altitude = 0;
-  let temp_float = 0;
-  let pressure_float = 0;
-  
-  for (let h = onset_altitude; h <= 40000; h += 1) {
-    const [P_h, T_h] = isaPressureTemp(h);
-    const air_density_h = airDensity(P_h, T_h);
-    if (air_density_h <= system_density) {
-      float_altitude = h;
-      temp_float = T_h;
-      pressure_float = P_h;
-      break;
-    }
-  }
-  
-  const altitude_gain = float_altitude - onset_altitude;
-  const ascent_time_min = (float_altitude - launch_elevation) / (v_ascent_launch * 60) * 0.7; // Factor for slowing ascent
-  
-  updateElement('float_altitude', float_altitude.toFixed(0));
-  updateElement('float_altitude_ft', (float_altitude * 3.28084).toFixed(0));
-  updateElement('altitude_gain', altitude_gain.toFixed(0));
-  updateElement('temp_float', (temp_float - 273.15).toFixed(1));
-  updateElement('ascent_time_min', ascent_time_min.toFixed(0));
-  updateElement('calc_float_altitude', `ρ_air = ${system_density.toFixed(4)} kg/m³ at ${float_altitude.toFixed(0)} m`);
-  updateElement('calc_system_density', `= ${total_mass.toFixed(2)} / ${balloon_volume} / 1000 = ${system_density.toFixed(4)} kg/m³`);
-  
-  // STEP 6: Pressure analysis at float
-  const internal_pressure = (P_launch * fill_volume / T_launch_K) * (temp_float / balloon_volume);
-  const diff_pressure = internal_pressure - pressure_float;
-  const diff_pressure_psi = diff_pressure * 0.145038;
-  
-  updateElement('internal_pressure', internal_pressure.toFixed(3));
-  updateElement('pressure_float', pressure_float.toFixed(3));
-  updateElement('diff_pressure', diff_pressure.toFixed(3));
-  updateElement('diff_pressure_psi', diff_pressure_psi.toFixed(3));
-  
-  updateElement('calc_internal_pressure', `P_int = (${P_launch.toFixed(3)} × ${fill_volume.toFixed(4)} / ${T_launch_K.toFixed(2)}) × (${temp_float.toFixed(2)} / ${balloon_volume}) = ${internal_pressure.toFixed(3)} kPa`);
-  updateElement('calc_external_pressure', `P_ext = ${pressure_float.toFixed(3)} kPa at ${float_altitude.toFixed(0)} m`);
-  updateElement('calc_diff_pressure', `ΔP = ${internal_pressure.toFixed(3)} - ${pressure_float.toFixed(3)} = ${diff_pressure.toFixed(3)} kPa (${diff_pressure_psi.toFixed(3)} psi)`);
-  
-  // Safety indicator
-  const safetyEl = document.getElementById('safety_indicator');
-  if (diff_pressure < 4.0) {
-    safetyEl.className = 'safety-indicator safety-safe';
-    safetyEl.textContent = `✅ SAFE: ${diff_pressure.toFixed(2)} kPa differential is well below burst limit (4.7-5.4 kPa for Qualatex 36")`;
-  } else if (diff_pressure < 4.7) {
-    safetyEl.className = 'safety-indicator safety-caution';
-    safetyEl.textContent = `⚠️ CAUTION: ${diff_pressure.toFixed(2)} kPa differential is approaching burst limit (4.7-5.4 kPa)`;
-  } else {
-    safetyEl.className = 'safety-indicator safety-danger';
-    safetyEl.textContent = `❌ DANGER: ${diff_pressure.toFixed(2)} kPa differential EXCEEDS typical burst limit (4.7-5.4 kPa)!`;
-  }
-  
-  // Generate all charts
-  generateCharts(fill_volume, balloon_volume, total_mass_kg, P_launch, T_launch_K, onset_altitude, float_altitude, launch_elevation);
-}
-
-// ============================================
-// CHART GENERATION
-// ============================================
-
-function generateCharts(V_fill, V_max, m_total, P_launch, T_launch, onset_alt, float_alt, h_launch) {
-  const altitudes = [];
-  const volumes = [];
-  const ascent_rates = [];
-  const buoyancies = [];
-  const weights = [];
-  const net_forces = [];
-  const internal_pressures = [];
-  const external_pressures = [];
-  
-  // Generate data points from launch to above float altitude
-  const maxAlt = Math.min(40000, float_alt + 2000);
-  for (let h = h_launch; h <= maxAlt; h += 200) {
-    const [P_h, T_h] = isaPressureTemp(h);
-    const rho_air = airDensity(P_h, T_h);
-    
-    // Volume: expands until onset, then constant
-    const V_expanded = V_fill * (P_launch / P_h) * (T_h / T_launch);
-    const V = Math.min(V_expanded, V_max);
-    
-    // Ascent rate
-    const v_asc = calculateAscentRate(h, V, m_total, rho_air);
-    
-    // Forces
-    const F_b = rho_air * V * PHYSICS.g;
-    const F_w = m_total * PHYSICS.g;
-    const F_net = F_b - F_w;
-    
-    // Pressures
-    const P_int = (h >= onset_alt) ? 
-      (P_launch * V_fill / T_launch) * (T_h / V_max) : 
-      P_h;
-    
-    altitudes.push(h / 1000);  // Convert to km for display
-    volumes.push(V);
-    ascent_rates.push(v_asc);
-    buoyancies.push(F_b);
-    weights.push(F_w);
-    net_forces.push(F_net);
-    internal_pressures.push(P_int / 0.01); // Convert to hPa
-    external_pressures.push(P_h / 0.01);   // Convert to hPa
-  }
-  
-  // Chart 1: Volume & Ascent Rate
-  if (charts.ascent) charts.ascent.destroy();
-  const ctx1 = document.getElementById('ascentChart').getContext('2d');
-  charts.ascent = new Chart(ctx1, {
-    type: 'line',
-    data: {
-      labels: altitudes,
-      datasets: [{
-        label: 'Volume (m³)',
-        data: volumes,
-        borderColor: '#2196F3',
-        backgroundColor: 'rgba(33, 150, 243, 0.1)',
-        yAxisID: 'y',
-        tension: 0.1,
-        fill: false,
-        borderWidth: 2
-      }, {
-        label: 'Ascent Rate (m/s)',
-        data: ascent_rates,
-        borderColor: '#FF9800',
-        backgroundColor: 'rgba(255, 152, 0, 0.1)',
-        yAxisID: 'y1',
-        tension: 0.1,
-        fill: false,
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { 
-          title: { display: true, text: 'Altitude (km)', font: {size: 14} }
-        },
-        y: {
-          type: 'linear',
-          position: 'left',
-          title: { display: true, text: 'Volume (m³)', font: {size: 14} },
-          beginAtZero: true
-        },
-        y1: {
-          type: 'linear',
-          position: 'right',
-          title: { display: true, text: 'Ascent Rate (m/s)', font: {size: 14} },
-          beginAtZero: true,
-          grid: { drawOnChartArea: false }
-        }
-      },
-      plugins: {
-        legend: { display: true, position: 'top' }
-      }
-    }
-  });
-  
-  // Chart 2: Forces Analysis
-  if (charts.forces) charts.forces.destroy();
-  const ctx2 = document.getElementById('forcesChart').getContext('2d');
-  charts.forces = new Chart(ctx2, {
-    type: 'line',
-    data: {
-      labels: altitudes,
-      datasets: [{
-        label: 'Buoyancy Force (N)',
-        data: buoyancies,
-        borderColor: '#2196F3',
-        tension: 0.1,
-        borderWidth: 2,
-        fill: false
-      }, {
-        label: 'Weight Force (N)',
-        data: weights,
-        borderColor: '#F44336',
-        tension: 0.1,
-        borderWidth: 2,
-        fill: false
-      }, {
-        label: 'Net Force (N)',
-        data: net_forces,
-        borderColor: '#4CAF50',
-        borderWidth: 3,
-        tension: 0.1,
-        fill: false
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { 
-          title: { display: true, text: 'Altitude (km)', font: {size: 14} }
-        },
-        y: { 
-          title: { display: true, text: 'Force (N)', font: {size: 14} },
-          beginAtZero: true
-        }
-      },
-      plugins: {
-        legend: { display: true, position: 'top' }
-      }
-    }
-  });
-  
-  // Chart 3: Pressure Analysis (altitude on y-axis, pressure on x-axis)
-  if (charts.pressure) charts.pressure.destroy();
-  const ctx3 = document.getElementById('pressureChart').getContext('2d');
-  charts.pressure = new Chart(ctx3, {
-    type: 'scatter',
-    data: {
-      datasets: [{
-        label: 'External Pressure (hPa)',
-        data: external_pressures.map((p, i) => ({ x: p, y: altitudes[i] })),
-        borderColor: '#2196F3',
-        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-        showLine: true,
-        tension: 0.1,
-        borderWidth: 2,
-        pointRadius: 0
-      }, {
-        label: 'Internal Pressure (hPa)',
-        data: internal_pressures.map((p, i) => ({ x: p, y: altitudes[i] })),
-        borderColor: '#F44336',
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        showLine: true,
-        tension: 0.1,
-        borderWidth: 2,
-        pointRadius: 0
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        x: { 
-          title: { display: true, text: 'Pressure (hPa)', font: {size: 14} },
-          reverse: true,  // Pressure decreases to the right
-          beginAtZero: false
-        },
-        y: { 
-          title: { display: true, text: 'Altitude (km)', font: {size: 14} },
-          beginAtZero: true
-        }
-      },
-      plugins: {
-        legend: { display: true, position: 'top' },
-        annotation: {
-          annotations: {
-            onsetLine: {
-              type: 'line',
-              yMin: onset_alt / 1000,
-              yMax: onset_alt / 1000,
-              borderColor: '#9C27B0',
-              borderWidth: 2,
-              borderDash: [5, 5],
-              label: {
-                content: 'Onset',
-                enabled: true,
-                position: 'end'
-              }
-            },
-            floatLine: {
-              type: 'line',
-              yMin: float_alt / 1000,
-              yMax: float_alt / 1000,
-              borderColor: '#4CAF50',
-              borderWidth: 2,
-              borderDash: [5, 5],
-              label: {
-                content: 'Float',
-                enabled: true,
-                position: 'end'
-              }
-            }
-          }
-        }
-      }
-    }
-  });
-}
-
-// ============================================
-// UTILITY FUNCTIONS
-// ============================================
-
-function updateElement(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value;
-}
-
-// ============================================
-// INITIALIZATION
-// ============================================
-
-function initCalculator() {
-  // Add event listeners to all inputs
-  document.querySelectorAll('input, select').forEach(input => {
-    input.addEventListener('input', updateCalculations);
-  });
-  
-  // Initial calculation
-  updateCalculations();
-}
-
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initCalculator);
-} else {
-  initCalculator();
-}
-</script>
+<script src="balloon_calculator.js"></script>
 </body>
 </html>
